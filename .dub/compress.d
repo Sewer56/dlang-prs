@@ -1,8 +1,8 @@
 /*
 	PRS-R (dlang-prs)
 	
-	The launcher for a universal, powerful, multi-game and multi-process mod loader
-	based off of the concept of DLL Injection to execute arbitrary program code.
+	A high performance custom compressor/decompressor for SEGA's
+	PRS compression format used since the Sega Saturn.
 	Copyright (C) 2018  Sewer. Sz (Sewer56)
 
 	PRS-R is free software: you can redistribute it and/or modify
