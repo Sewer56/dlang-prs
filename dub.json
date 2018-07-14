@@ -1,0 +1,9 @@
+{
+	"name": "dlang-prs",
+	"authors": [
+		"Sewer56"
+	],
+	"description": "A port of basic PRS compressor + decompressor written to the D language.",
+	"copyright": "Copyright © 2018, Sewer56",
+	"license": "GPLV3"
+}
