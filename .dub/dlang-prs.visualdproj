@@ -123,7 +123,7 @@
   <vtls>0</vtls>
   <vgc>0</vgc>
   <symdebug>0</symdebug>
-  <symdebugref>1</symdebugref>
+  <symdebugref>0</symdebugref>
   <optimize>1</optimize>
   <cpu>0</cpu>
   <isX86_64>0</isX86_64>
@@ -339,7 +339,7 @@
   <vtls>0</vtls>
   <vgc>0</vgc>
   <symdebug>0</symdebug>
-  <symdebugref>1</symdebugref>
+  <symdebugref>0</symdebugref>
   <optimize>1</optimize>
   <cpu>0</cpu>
   <isX86_64>1</isX86_64>
@@ -436,8 +436,9 @@
   <Folder name="dlang-prs">
    <Folder name="source">
     <Folder name="PRS">
-     <File path="compress.d" />
-     <File path="exports.d" />
+     <File path="..\source\PRS\compress.d" />
+     <File path="..\source\PRS\decompress.d" />
+     <File path="..\source\PRS\exports.d" />
     </Folder>
     <File path="..\source\app.d" />
    </Folder>

@@ -55,8 +55,6 @@ private int currentBitPosition = 0;
 /**
 	Stores the current instance of the control byte which will have various variable length
 	codes appended to it in order to instruct the decoder what to do next.
-
-	Downcasted to byte on write.
 */
 private byte* controlByte;
 
