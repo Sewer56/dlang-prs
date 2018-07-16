@@ -7,6 +7,11 @@ import prs.compress;
 import prs.decompress;
 import std.datetime.stopwatch;
 
+/*
+	[Visual D]
+	To run me, right click the dlang-prs project in the solution explorer and hit properties, then change output type to Executable.
+	Under Linker category/tab, change the output's extension to .exe
+*/
 void main()
 {
 	// Whoohoo!
@@ -19,8 +24,8 @@ void main()
 	void compbench() 
 	{ 
 		// 1/4 search buffer size, use 1FFF for benchmarking against other implementations.
-		byte[] prsFile = compress(original, 0x7ff); 
-		std.file.write("testd.prs", prsFile);
+		auto prsFile = compress(original, 0x7ff); 
+		std.file.write("testd.prs", (&prsFile[0])[0 .. prsFile.length]);
 	}
 
 	// Benchmark
@@ -33,8 +38,8 @@ void main()
 	// Decompress
 	void decompbench() 
 	{ 
-		byte[] decompFile = decompress(compressed); 
-		std.file.write("testdnew.bin", decompFile);
+		auto decompFile = decompress(compressed); 
+		std.file.write("testdnew.bin", (&decompFile[0])[0 .. decompFile.length]);
 	}
 
 	

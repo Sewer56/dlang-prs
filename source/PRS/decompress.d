@@ -48,7 +48,7 @@ private int pointer = 0;
 		source = An array of bytes read containing a PRS compressed file or structure.
 
 */
-public byte[] decompress(byte[] source)
+public Array!byte decompress(byte[] source)
 {
 	// Initialize variables.
 	pointer = 0;
@@ -83,8 +83,7 @@ public byte[] decompress(byte[] source)
 	}
 	
 	// Return back
-	byte[] byteArray = (&destination[0])[0 .. destination.length];
-	return byteArray.dup;
+	return destination;
 }
 
 /**

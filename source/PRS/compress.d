@@ -114,7 +114,7 @@ alias LZ77Properties = Tuple!(int, "offset", int, "length");
 								Changing this value has no noticeable effect on decompression time.
 						   
 */
-public byte[] compress(byte[] source, int searchBufferSize = 0x1FFF)
+public Array!byte compress(byte[] source, int searchBufferSize = 0x1FFF)
 {
 	// Assume our compressed file will be at least of equivalent length.
 	auto destination = Array!byte();
@@ -154,8 +154,7 @@ public byte[] compress(byte[] source, int searchBufferSize = 0x1FFF)
 	destination.insert(cast(byte)0x00);
 
 	// Return back
-	byte[] byteArray = (&destination[0])[0 .. destination.length];
-	return byteArray.dup;
+	return destination;
 }
 
 /**

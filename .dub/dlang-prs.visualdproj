@@ -3,12 +3,12 @@
  <Config name="debug" platform="Win32">
   <obj>0</obj>
   <link>0</link>
-  <lib>0</lib>
+  <lib>2</lib>
   <subsystem>0</subsystem>
   <multiobj>0</multiobj>
   <singleFileCompilation>2</singleFileCompilation>
   <oneobj>0</oneobj>
-  <mscoff>0</mscoff>
+  <mscoff>1</mscoff>
   <trace>0</trace>
   <quiet>0</quiet>
   <verbose>0</verbose>
@@ -57,7 +57,7 @@
   <program>$(DMDInstallDir)windows\bin\dmd.exe</program>
   <imppath>&quot;..\source&quot;</imppath>
   <fileImppath />
-  <outdir>C:\Users\sewer\Desktop\Github\dlang-PRS\</outdir>
+  <outdir>C:\Users\sewer\Desktop\Github\dlang-PRS\build</outdir>
   <objdir>obj/debug/dummy/dlang-prs</objdir>
   <objname />
   <libname />
@@ -96,7 +96,7 @@
   <libpaths />
   <deffile />
   <resfile />
-  <exefile>C:\Users\sewer\Desktop\Github\dlang-PRS\dlang-prs.exe</exefile>
+  <exefile>C:\Users\sewer\Desktop\Github\dlang-PRS\build\dlang-prs.dll</exefile>
   <pdbfile>$(IntDir)\$(SafeProjectName).pdb</pdbfile>
   <impfile>$(IntDir)\$(SafeProjectName).lib</impfile>
   <mapfile>$(IntDir)\$(SafeProjectName).map</mapfile>
@@ -111,12 +111,12 @@
  <Config name="release" platform="Win32">
   <obj>0</obj>
   <link>0</link>
-  <lib>0</lib>
+  <lib>2</lib>
   <subsystem>0</subsystem>
   <multiobj>0</multiobj>
   <singleFileCompilation>2</singleFileCompilation>
   <oneobj>0</oneobj>
-  <mscoff>0</mscoff>
+  <mscoff>1</mscoff>
   <trace>0</trace>
   <quiet>0</quiet>
   <verbose>0</verbose>
@@ -165,7 +165,7 @@
   <program>$(DMDInstallDir)windows\bin\dmd.exe</program>
   <imppath>&quot;..\source&quot;</imppath>
   <fileImppath />
-  <outdir>C:\Users\sewer\Desktop\Github\dlang-PRS\</outdir>
+  <outdir>C:\Users\sewer\Desktop\Github\dlang-PRS\build</outdir>
   <objdir>obj/debug/dummy/dlang-prs</objdir>
   <objname />
   <libname />
@@ -204,12 +204,12 @@
   <libpaths />
   <deffile />
   <resfile />
-  <exefile>C:\Users\sewer\Desktop\Github\dlang-PRS\dlang-prs.exe</exefile>
+  <exefile>C:\Users\sewer\Desktop\Github\dlang-PRS\build\dlang-prs.dll</exefile>
   <pdbfile>$(IntDir)\$(SafeProjectName).pdb</pdbfile>
   <impfile>$(IntDir)\$(SafeProjectName).lib</impfile>
   <mapfile>$(IntDir)\$(SafeProjectName).map</mapfile>
   <useStdLibPath>1</useStdLibPath>
-  <cRuntime>2</cRuntime>
+  <cRuntime>1</cRuntime>
   <privatePhobos>0</privatePhobos>
   <additionalOptions />
   <preBuildCommand />
@@ -219,7 +219,7 @@
  <Config name="debug" platform="x64">
   <obj>0</obj>
   <link>0</link>
-  <lib>0</lib>
+  <lib>2</lib>
   <subsystem>0</subsystem>
   <multiobj>0</multiobj>
   <singleFileCompilation>2</singleFileCompilation>
@@ -265,7 +265,7 @@
   <ignoreUnsupportedPragmas>0</ignoreUnsupportedPragmas>
   <allinst>0</allinst>
   <stackStomp>0</stackStomp>
-  <compiler>2</compiler>
+  <compiler>0</compiler>
   <otherDMD>0</otherDMD>
   <cccmd>$(CC) -c</cccmd>
   <ccTransOpt>1</ccTransOpt>
@@ -273,7 +273,7 @@
   <program>$(DMDInstallDir)windows\bin\dmd.exe</program>
   <imppath>&quot;..\source&quot;</imppath>
   <fileImppath />
-  <outdir>C:\Users\sewer\Desktop\Github\dlang-PRS\</outdir>
+  <outdir>C:\Users\sewer\Desktop\Github\dlang-PRS\build</outdir>
   <objdir>obj/debug/dummy/dlang-prs</objdir>
   <objname />
   <libname />
@@ -312,7 +312,7 @@
   <libpaths />
   <deffile />
   <resfile />
-  <exefile>C:\Users\sewer\Desktop\Github\dlang-PRS\dlang-prs.exe</exefile>
+  <exefile>C:\Users\sewer\Desktop\Github\dlang-PRS\build\dlang-prs.dll</exefile>
   <pdbfile>$(IntDir)\$(SafeProjectName).pdb</pdbfile>
   <impfile>$(IntDir)\$(SafeProjectName).lib</impfile>
   <mapfile>$(IntDir)\$(SafeProjectName).map</mapfile>
@@ -327,12 +327,12 @@
  <Config name="release" platform="x64">
   <obj>0</obj>
   <link>0</link>
-  <lib>0</lib>
+  <lib>2</lib>
   <subsystem>0</subsystem>
   <multiobj>0</multiobj>
   <singleFileCompilation>2</singleFileCompilation>
   <oneobj>0</oneobj>
-  <mscoff>0</mscoff>
+  <mscoff>1</mscoff>
   <trace>0</trace>
   <quiet>0</quiet>
   <verbose>0</verbose>
@@ -373,7 +373,7 @@
   <ignoreUnsupportedPragmas>0</ignoreUnsupportedPragmas>
   <allinst>1</allinst>
   <stackStomp>0</stackStomp>
-  <compiler>2</compiler>
+  <compiler>0</compiler>
   <otherDMD>0</otherDMD>
   <cccmd>$(CC) -c</cccmd>
   <ccTransOpt>1</ccTransOpt>
@@ -381,7 +381,7 @@
   <program>$(DMDInstallDir)windows\bin\dmd.exe</program>
   <imppath>&quot;..\source&quot;</imppath>
   <fileImppath />
-  <outdir>C:\Users\sewer\Desktop\Github\dlang-PRS\</outdir>
+  <outdir>C:\Users\sewer\Desktop\Github\dlang-PRS\build</outdir>
   <objdir>obj/debug/dummy/dlang-prs</objdir>
   <objname />
   <libname />
@@ -420,12 +420,12 @@
   <libpaths />
   <deffile />
   <resfile />
-  <exefile>C:\Users\sewer\Desktop\Github\dlang-PRS\dlang-prs.exe</exefile>
+  <exefile>C:\Users\sewer\Desktop\Github\dlang-PRS\build\dlang-prs.dll</exefile>
   <pdbfile>$(IntDir)\$(SafeProjectName).pdb</pdbfile>
   <impfile>$(IntDir)\$(SafeProjectName).lib</impfile>
   <mapfile>$(IntDir)\$(SafeProjectName).map</mapfile>
   <useStdLibPath>1</useStdLibPath>
-  <cRuntime>2</cRuntime>
+  <cRuntime>1</cRuntime>
   <privatePhobos>0</privatePhobos>
   <additionalOptions />
   <preBuildCommand />
