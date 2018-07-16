@@ -14,6 +14,7 @@ namespace csharp_test
     {
         static void Main(string[] args)
         {
+            // If you get Access violation executing location... remember to switch project type from executable to DLL for D project.
             // Benchmark Time!
             Stopwatch stopwatch = new Stopwatch();
 

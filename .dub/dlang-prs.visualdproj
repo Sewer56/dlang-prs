@@ -265,7 +265,7 @@
   <ignoreUnsupportedPragmas>0</ignoreUnsupportedPragmas>
   <allinst>0</allinst>
   <stackStomp>0</stackStomp>
-  <compiler>0</compiler>
+  <compiler>2</compiler>
   <otherDMD>0</otherDMD>
   <cccmd>$(CC) -c</cccmd>
   <ccTransOpt>1</ccTransOpt>
@@ -373,7 +373,7 @@
   <ignoreUnsupportedPragmas>0</ignoreUnsupportedPragmas>
   <allinst>1</allinst>
   <stackStomp>0</stackStomp>
-  <compiler>0</compiler>
+  <compiler>2</compiler>
   <otherDMD>0</otherDMD>
   <cccmd>$(CC) -c</cccmd>
   <ccTransOpt>1</ccTransOpt>

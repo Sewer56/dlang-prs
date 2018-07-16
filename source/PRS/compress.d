@@ -164,6 +164,7 @@ public Array!byte compress(byte[] source, int searchBufferSize = 0x1FFF)
 	Params:
 		lz77Match stores the individual details of a lz77 
 */
+pragma(inline, true)
 public void encodeLZ77Match(ref Array!byte destinationArray, ref LZ77Properties lz77Match)
 {
 	// The match length will be modified before it will be written to save on lines, let us increment the file pointer now instead.
