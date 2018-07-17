@@ -29,7 +29,7 @@ namespace csharp_prs
         /// Increasing this value compresses the data to smaller filesizes at the expense of compression time.
         /// Changing this value has no noticeable effect on decompression time.</param>
         /// <returns></returns>
-        public static byte[] Compress(byte[] data, int searchBufferSize)
+        public static byte[] Compress(ref byte[] data, int searchBufferSize)
         {
             ByteArray byteArray = _compressor.externCompress(data, data.Length, searchBufferSize);
             return byteArray.GetBytes();
@@ -41,7 +41,7 @@ namespace csharp_prs
         /// </summary>
         /// <param name="data">The individual PRS compressed data to decompress.</param>
         /// <returns></returns>
-        public static byte[] Decompress(byte[] data)
+        public static byte[] Decompress(ref byte[] data)
         {
             ByteArray byteArray = _compressor.externDecompress(data, data.Length);
             return byteArray.GetBytes();

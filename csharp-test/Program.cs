@@ -24,7 +24,7 @@ namespace csharp_test
 
             // Benchmark: Compress 1/4 search buffer size and write to file
             stopwatch.Start();
-            File.WriteAllBytes("test.prs", Prs.Compress(test, 0x7FF));
+            File.WriteAllBytes("test.prs", Prs.Compress(ref test, 0x7FF));
             stopwatch.Stop();
 
             // Actually release memory (check if it works)
