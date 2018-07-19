@@ -309,19 +309,9 @@ public LZ77Properties lz77GetLongestMatch(ref byte[] source, int pointer, int se
 			currentLength = 1;
 			
 			/* Check for matches. */
-			while ((source[currentPointer + currentLength] == source[pointer + currentLength]))
+			while ((pointer + currentLength < source.length) && (source[currentPointer + currentLength] == source[pointer + currentLength]))
 			{
 				currentLength++;
-
-				/*
-					Check if we should evaluate next index on next while statement here rather than in the loop expression.
-
-					Allows us top keep the byte comparison check first (while loop condition), which largely helps performance as 
-					the probability of that expression to match false is very high while the probability of this expression matching
-					false is very low.
-				*/
-				if (pointer + currentLength >= source.length)
-					break;
 			}
 
 			/* 
