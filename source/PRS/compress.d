@@ -118,7 +118,11 @@ public Array!byte compress(byte[] source, int searchBufferSize = 0x1FFF)
 {
 	// Assume our compressed file will be at least of equivalent length.
 	auto destination = Array!byte();
-	destination.reserve(source.length);
+	destination.reserve(cast(int)((source.length * 1.20F) + 1));
+
+	// Theoretical worst scenario for PRS compression is 9/8, 112.5% size
+	// This is when every byte cannot get a copy back.
+	// Just in case, I will be very generous and give 120%, + 1 byte
 
 	// Setup control byte.
 	destination.insertBack(cast(byte) 0x00);
