@@ -48,7 +48,7 @@ private int pointer = 0;
 		source = An array of bytes read containing a PRS compressed file or structure.
 
 */
-public Array!byte decompress(byte[] source)
+public Array!byte decompress(ref byte[] source)
 {
 	// Initialize variables.
 	pointer = 0;
