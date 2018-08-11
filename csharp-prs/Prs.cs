@@ -15,7 +15,8 @@ namespace csharp_prs
     /// </summary>
     public static class Prs
     {
-        private const string LibraryName = "dlang-prs";
+        private const string LibraryName32 = "dlang-prs32";
+        private const string LibraryName64 = "dlang-prs64";
         private static IDlangPrs _compressor;
 
         /// <summary>
@@ -48,6 +49,17 @@ namespace csharp_prs
         }
 
         /// <summary>
+        /// Decodes the PRS compressed stream and returns the size of the PRS compressed
+        /// file, if it were to be decompressed. This operation is approximately 18 times
+        /// faster than decompressing and may be useful in some situations.
+        /// </summary>
+        /// <param name="data">The individual PRS compressed data to get the size of after decompression.</param>
+        public static int Estimate(ref byte[] data)
+        {
+            return _compressor.externEstimate(data, data.Length);
+        }
+
+        /// <summary>
         /// Free the individual prs compressed/uncompressed byte arrays from
         /// memory that have been passed back to C# code. Use after you are done
         /// compressing/decompressing.
@@ -59,7 +71,15 @@ namespace csharp_prs
 
         static Prs()
         {
-            _compressor = NativeLibraryBuilder.Default.ActivateInterface<IDlangPrs>(LibraryName);
+            if (IntPtr.Size == 4)
+            {
+                _compressor = NativeLibraryBuilder.Default.ActivateInterface<IDlangPrs>(LibraryName32);
+            }
+            else
+            {
+                _compressor = NativeLibraryBuilder.Default.ActivateInterface<IDlangPrs>(LibraryName64);
+            }
+            
         }
     }
 
@@ -94,6 +114,7 @@ namespace csharp_prs
     {
         ByteArray externCompress(byte[] data, int length, int searchBufferSize);
         ByteArray externDecompress(byte[] data, int length);
+        int externEstimate(byte[] data, int length);
         void clearFiles();
     }
 }

@@ -1,25 +1,25 @@
 /*
-    PRS-R (dlang-prs)
+	PRS-R (dlang-prs)
 
-    A high performance custom compressor/decompressor for SEGA's
-    PRS compression format used since the Sega Saturn.
-    Copyright (C) 2018  Sewer. Sz (Sewer56)
+	A high performance custom compressor/decompressor for SEGA's
+	PRS compression format used since the Sega Saturn.
+	Copyright (C) 2018  Sewer. Sz (Sewer56)
 
-    PRS-R is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	PRS-R is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    PRS-R is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	PRS-R is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
 
-module prs.decompress;
+module prs.estimate;
 import std.container.array;
 import std.typecons;
 
@@ -36,25 +36,26 @@ private byte controlByte;
 private int currentBitPosition = 0;
 
 /**
-    Specifies the current offset from the start of the file used during compression.
+    Specifies the current offset from the start of the file used during decompression.
 */
 private int pointer = 0;
 
 /**
-    Decompresses a supplied array of PRS compressed bytes and
-    returns a decompressed copy of said bytes.
+    Returns the size of a PRS encoded file by performing the decompression of a file
+    without actually copying any data for speed. This may be useful for the hacking of
+    games whereby you may want to ensure the game has enough space to decompress a specific
+    PRS encoded stream but don't want to actually decompress the stream yourself.
 
     Params:
     source = An array of bytes read containing a PRS compressed file or structure.
 */
-public Array!byte decompress(ref byte[] source)
+public int estimate(ref byte[] source)
 {
 	// Initialize variables.
 	pointer = 0;
 	controlByte = readByte(source);
 	currentBitPosition = 0;
-	auto destination = Array!byte();
-    destination.reserve(250000); // 250KB
+	int fileSize = 0;
 
 	// Endlessly iterate over the file until the end of file signature/opcode special combo is hit.
 	while (true)
@@ -62,8 +63,9 @@ public Array!byte decompress(ref byte[] source)
 		// Test for Direct Byte (Opcode 1)
 		if (retrieveControlBit(source) == 1)
 		{
-			// Write direct byte.
-			destination.insert(readByte(source));
+			// Increment direct byte.
+			pointer += 1;
+			fileSize += 1;
 			continue;
 		}
 
@@ -71,24 +73,24 @@ public Array!byte decompress(ref byte[] source)
 		// Test for Opcode 01
 		if (retrieveControlBit(source) == 1)
 		{
-			// Write long copy, break if it's end of file.
-			if (writeLongCopy(source, destination))
+			// Append size of long copy, break if it's end of file.
+			if (decodeLongCopy(source, fileSize))
 				break;
 		}
 		// Do Opcode 00
 		else
 		{
-			writeShortCopy(source, destination);
+			decodeShortCopy(source, fileSize);
 		}
 	}
 
 	// Return back
-	return destination;
+	return fileSize;
 }
 
 /**
     Decodes a PRS encoded longjump (after the opcode)
-    and writes the result into the destination array.
+    and appends the size of the longjump onto the file size.
 
     Returns true if this is the special end of file
     opcode, else false.
@@ -97,11 +99,11 @@ public Array!byte decompress(ref byte[] source)
     source = Source array to PRS shortcopy from.
     destination = Destination array to perform the copy operation to.
 */
-public bool writeLongCopy(ref byte[] source, ref Array!byte destination)
+public bool decodeLongCopy(ref byte[] source, ref int fileSize)
 {
 	// Obtain the offset and size packed combination.
 	int offset	=	readByte(source);		// Dlang will return negative number, e.g. ff ff ff 88 when only 88 is read because of signed bytes being default.
-	// Readbyte has been modified to return unsigned only
+	                                        // Readbyte has been modified to return unsigned only
 	offset		|=	readByte(source) << 8;	   
 
 	// Check for decompression end condition.
@@ -111,8 +113,8 @@ public bool writeLongCopy(ref byte[] source, ref Array!byte destination)
 	// Separate the size from the offset and calculate the actual offset.
 	int length = offset & 0b111;
 	offset = (offset >> 3) | -0x2000;	// When packing, we have lost the contents of the initial bits when left shifting which make
-	// our offset negative (8192 - offset = actual offset)
-	// Here we simply re-add those bits back to get our actual offset.
+	                                    // our offset negative (8192 - offset = actual offset)
+	                                    // Here we simply re-add those bits back to get our actual offset.
 
 	// Check if Mode 3 (Long Copy Large)
 	if (length == 0)
@@ -125,19 +127,19 @@ public bool writeLongCopy(ref byte[] source, ref Array!byte destination)
 	{ length += 2; }				   // Offset length by 2 a packed.
 
 	// LZ77 Write to Destination
-	lz77Copy(destination, length, offset);
+    fileSize += length;
 	return false;
 }
 
 /**
     Decodes a PRS encoded shortjump (after the opcode)
-    and writes the result into the destination array.
+    and appends the size of the shortjump onto the file size.
 
     Params:
     source = Source array to PRS shortcopy from.
     destination = Destination array to perform the copy operation to.
 */
-public void writeShortCopy(ref byte[] source, ref Array!byte destination)
+public void decodeShortCopy(ref byte[] source, ref int fileSize)
 {
 	// Use a shorter variable name for simplification. (Compiler will optimize this out in release mode)
 	int length = 0;
@@ -155,23 +157,7 @@ public void writeShortCopy(ref byte[] source, ref Array!byte destination)
 	                                        // We lost our sign when we originally wrote the offset.
 
 	// LZ77 Write to Destination
-	lz77Copy(destination, length, offset);
-}
-
-/**
-    Copies bytes from the source array to the destination array with the specified length
-    and offset. The final byte index of the destination is used for declaring the position from which
-    the look behind operation is performed.
-*/
-pragma(inline, true)
-public void lz77Copy(ref Array!byte destination, int length, int offset)
-{
-	// Contains the pointer to the destination array from which to perform the look back for bytes to copy from.
-	int copyStartPosition = cast(int)((destination.length) + offset); // offset is negative
-
-	// Copy to destination.
-	for (int x = 0; x < length; x++)
-		destination.insert(destination[copyStartPosition + x]);
+    fileSize += length;
 }
 
 /**

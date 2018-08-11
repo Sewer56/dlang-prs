@@ -21,6 +21,7 @@
 
 module prs.exports;
 
+import prs.estimate;
 import prs.compress;
 import prs.decompress;
 import std.container.array;
@@ -65,7 +66,7 @@ public shared Mutex mutex;
 	Compresses a supplied byte array.
 	Returns the compressed version of the byte array.
 	After you are done with using the byte array returned, you should call the exported function
-	addGCRoot() with the pointer to re-add for garbage collection.
+	clearFiles() to dispose of the leftover memory returned to you.
 
 	Params:
 	data =					Pointer to the start of the byte array of the file to decompress.
@@ -140,7 +141,7 @@ public void enableMutex()
 	Decompresses a supplied byte array.
 	Returns the decompressed version of the byte array.
 	After you are done with using the byte array returned, you should call the exported function
-	addGCRoot() with the pointer to re-add for garbage collection.
+	clearFiles() to dispose of the leftover memory returned to you.
 
 	Params:
 	source =				The byte array containing the file or data to compress.
@@ -153,4 +154,23 @@ export extern(C) ByteArray externDecompress(byte* data, int length)
 	addFile(decompressedData);
 
 	return ByteArray(cast(int)decompressedData.length, &decompressedData[0]);
+}
+
+/**
+	Returns the size of a PRS compressed file after decompression, but without performing
+    the actual decompression process.
+
+    Useful if in any case, you do not want to decompress the file but want to know its size
+    after decompression.
+
+	Params:
+	source =				The byte array containing the file or data to compress.
+	length =				The length of the byte array.
+*/
+export extern(C) int externEstimate(byte* data, int length)
+{
+	byte[] passedData = data[0 .. length];
+	int decompressedDataSize = estimate(passedData);
+
+	return decompressedDataSize;
 }

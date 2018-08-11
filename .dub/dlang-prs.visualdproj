@@ -57,7 +57,7 @@
   <program>$(DMDInstallDir)windows\bin\dmd.exe</program>
   <imppath>&quot;..\source&quot;</imppath>
   <fileImppath />
-  <outdir>C:\Users\sewer\Desktop\Github\dlang-PRS\build</outdir>
+  <outdir>D:\Users\Desktop\Github\dlang-PRS\build</outdir>
   <objdir>obj/debug/dummy/dlang-prs</objdir>
   <objname />
   <libname />
@@ -96,7 +96,7 @@
   <libpaths />
   <deffile />
   <resfile />
-  <exefile>C:\Users\sewer\Desktop\Github\dlang-PRS\build\dlang-prs.dll</exefile>
+  <exefile>D:\Users\Desktop\Github\dlang-PRS\build\dlang-prs32.dll</exefile>
   <pdbfile>$(IntDir)\$(SafeProjectName).pdb</pdbfile>
   <impfile>$(IntDir)\$(SafeProjectName).lib</impfile>
   <mapfile>$(IntDir)\$(SafeProjectName).map</mapfile>
@@ -165,7 +165,7 @@
   <program>$(DMDInstallDir)windows\bin\dmd.exe</program>
   <imppath>&quot;..\source&quot;</imppath>
   <fileImppath />
-  <outdir>C:\Users\sewer\Desktop\Github\dlang-PRS\build</outdir>
+  <outdir>D:\Users\Desktop\Github\dlang-PRS\build</outdir>
   <objdir>obj/debug/dummy/dlang-prs</objdir>
   <objname />
   <libname />
@@ -204,7 +204,7 @@
   <libpaths />
   <deffile />
   <resfile />
-  <exefile>C:\Users\sewer\Desktop\Github\dlang-PRS\build\dlang-prs.dll</exefile>
+  <exefile>D:\Users\Desktop\Github\dlang-PRS\build\dlang-prs32.dll</exefile>
   <pdbfile>$(IntDir)\$(SafeProjectName).pdb</pdbfile>
   <impfile>$(IntDir)\$(SafeProjectName).lib</impfile>
   <mapfile>$(IntDir)\$(SafeProjectName).map</mapfile>
@@ -273,7 +273,7 @@
   <program>$(DMDInstallDir)windows\bin\dmd.exe</program>
   <imppath>&quot;..\source&quot;</imppath>
   <fileImppath />
-  <outdir>C:\Users\sewer\Desktop\Github\dlang-PRS\build</outdir>
+  <outdir>D:\Users\Desktop\Github\dlang-PRS\build</outdir>
   <objdir>obj/debug/dummy/dlang-prs</objdir>
   <objname />
   <libname />
@@ -312,7 +312,7 @@
   <libpaths />
   <deffile />
   <resfile />
-  <exefile>C:\Users\sewer\Desktop\Github\dlang-PRS\build\dlang-prs.dll</exefile>
+  <exefile>D:\Users\Desktop\Github\dlang-PRS\build\dlang-prs64.dll</exefile>
   <pdbfile>$(IntDir)\$(SafeProjectName).pdb</pdbfile>
   <impfile>$(IntDir)\$(SafeProjectName).lib</impfile>
   <mapfile>$(IntDir)\$(SafeProjectName).map</mapfile>
@@ -381,7 +381,7 @@
   <program>$(DMDInstallDir)windows\bin\dmd.exe</program>
   <imppath>&quot;..\source&quot;</imppath>
   <fileImppath />
-  <outdir>C:\Users\sewer\Desktop\Github\dlang-PRS\build</outdir>
+  <outdir>D:\Users\Desktop\Github\dlang-PRS\build</outdir>
   <objdir>obj/debug/dummy/dlang-prs</objdir>
   <objname />
   <libname />
@@ -420,7 +420,7 @@
   <libpaths />
   <deffile />
   <resfile />
-  <exefile>C:\Users\sewer\Desktop\Github\dlang-PRS\build\dlang-prs.dll</exefile>
+  <exefile>D:\Users\Desktop\Github\dlang-PRS\build\dlang-prs64.dll</exefile>
   <pdbfile>$(IntDir)\$(SafeProjectName).pdb</pdbfile>
   <impfile>$(IntDir)\$(SafeProjectName).lib</impfile>
   <mapfile>$(IntDir)\$(SafeProjectName).map</mapfile>
@@ -438,6 +438,7 @@
     <Folder name="PRS">
      <File path="..\source\PRS\compress.d" />
      <File path="..\source\PRS\decompress.d" />
+     <File path="estimate.d" />
      <File path="..\source\PRS\exports.d" />
     </Folder>
     <File path="..\source\app.d" />

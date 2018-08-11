@@ -5,6 +5,7 @@ import std.conv;
 import std.file;
 import prs.compress;
 import prs.decompress;
+import prs.estimate;
 import std.datetime.stopwatch;
 
 /*
@@ -29,7 +30,7 @@ void main()
 	}
 
 	// Benchmark
-	auto compDurations = benchmark!(compbench)(1);
+	auto compDurations = benchmark!(compbench)(10);
 	writeln("Compress: " ~ compDurations[0].toString());
 
 	// Read
@@ -42,9 +43,17 @@ void main()
 		std.file.write("testdnew.bin", (&decompFile[0])[0 .. decompFile.length]);
 	}
 
-	
-	auto decompDurations = benchmark!(decompbench)(1);
+    // Estimate
+	int estimatebench() 
+	{ 
+		return estimate(compressed);
+	}
+
+	auto decompDurations = benchmark!(decompbench)(10);
 	writeln("Decompress: " ~ decompDurations[0].toString());
+
+    auto estimateDurations = benchmark!(estimatebench)(10);
+	writeln("Estimate: " ~ estimateDurations[0].toString());
 
 	// Hang (testing)
 	readln();
