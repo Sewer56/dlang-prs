@@ -233,7 +233,9 @@ FraGag.Compression.Prs    | 100              |
 dlang-prs (Wrapper)       | 143.8            |
 ----------------------------------------------
 
-*Estimate: A value of 0.7 for highly compressible file decompression time was assumed based on the following similar benchmark (Medium compression). The large file decompressed at 169.7% speed; from extra testing beyond this document - the smaller the file, the greater the advantage prs-util had.
+*Estimate: A value of 0.7 for highly compressible file decompression time was assumed based on the
+following similar benchmark (Medium compression). The large file decompressed at 169.7% speed. 
+From extra testing beyond this document - the smaller the file, the greater the advantage prs-util had.
 
 X86 Decompression:
 
