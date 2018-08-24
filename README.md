@@ -190,7 +190,8 @@ Decompression benchmarks are performed on files output by FraGag.Compression.Prs
 All percentages are rounded down (I'm lazy).
 
 dlang-prs has been compiled under LDC2 (LDC 1.11.0-beta1)
-prs-util (https://github.com/Isaac-Lozano/SA2-utils) has been compiled with `opt-level = 3` and `RUSTFLAGS="-C target-cpu=native"`.
+prs-util (https://github.com/Isaac-Lozano/SA2-utils) has been compiled with `opt-level = 3`
+and `RUSTFLAGS="-C target-cpu=native"`.
 
 The results show a best case scenario (I know of) for every PRS Compressor/Decompressor.
 
@@ -211,7 +212,8 @@ dlang-prs (Wrapper)       | 151.8            | 101.7           | 38.2
 dlang-prs (0x7FF Buffer)  | 452.7            | 112.0           | 42.5
 --------------------------------------------------------------------------------------------
 
-Note: The medium, highly compressible file is a huge outlier for prs-util, at 24.3% relative speed. The other two tests have 86.9% and 92.3% respectively.
+Note: The medium, highly compressible file is a huge outlier for prs-util, at 24.3% relative speed.
+The other two tests have 86.9% and 92.3% respectively.
 
 X86 Compression:
 
