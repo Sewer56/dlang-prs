@@ -190,6 +190,9 @@ Decompression benchmarks are performed on files output by FraGag.Compression.Prs
 All percentages are rounded down (I'm lazy).
 
 dlang-prs has been compiled under LDC2 (LDC 1.11.0-beta1)
+prs-util (https://github.com/Isaac-Lozano/SA2-utils) has been compiled with `opt-level = 3` and `RUSTFLAGS="-C target-cpu=native"`.
+
+The results show a best case scenario (I know of) for every PRS Compressor/Decompressor.
 
 --------------------------------
 tl;dr Head to head.
@@ -202,10 +205,13 @@ X64 Compression:
 --------------------------------------------------------------------------------------------
 Name                      | Relative Speed % | Relative Size % | Average Compression Ratio %
 --------------------------------------------------------------------------------------------
+prs-util                  | 67.8             | 103.9           | 39.1
 FraGag.Compression.Prs    | 100              | 100             | 37.4
 dlang-prs (Wrapper)       | 151.8            | 101.7           | 38.2
 dlang-prs (0x7FF Buffer)  | 452.7            | 112.0           | 42.5
 --------------------------------------------------------------------------------------------
+
+Note: The medium, highly compressible file is a huge outlier for prs-util, at 24.3% relative speed. The other two tests have 86.9% and 92.3% respectively.
 
 X86 Compression:
 
@@ -222,9 +228,12 @@ X64 Decompression:
 ----------------------------------------------
 Name                      | Relative Speed % |
 ----------------------------------------------
+prs-util                  | 494.5% (estimate)|
 FraGag.Compression.Prs    | 100              |
 dlang-prs (Wrapper)       | 143.8            |
 ----------------------------------------------
+
+*Estimate: A value of 0.7 for highly compressible file decompression time was assumed based on the following similar benchmark (Medium compression). The large file decompressed at 169.7% speed; from extra testing beyond this document - the smaller the file, the greater the advantage prs-util had.
 
 X86 Decompression:
 
@@ -248,6 +257,7 @@ Name                    ||Search Buf. Size|| Notes                  ||  Time    
 dlang-prs               ||(0x1FFF window) ||(C# Wrapper)            ||: 9551ms  | 2,931,322 bytes | 57.1%
 dlang-prs               ||(0x1FFF window) ||                        ||: 9573ms  | 2,931,322 bytes | 57.1%
 FraGag.Compression.Prs  ||(0x1FF0 window) || MemoryStream/Fastest   ||: 14384ms | 2,838,425 bytes | 55.3%
+prs-util                ||(0x1FFF window) ||                        ||: 16544ms | 2,987,736 bytes | 58.2%
 ---------------------------------------------------------------------------------------------------------
 
 Compress X86:
@@ -281,6 +291,7 @@ Decompress X64:
 -------------------------------------------------------------
 Name                    || Notes                ||  Time    |
 -------------------------------------------------------------
+prs-util                ||                      ||: 43ms
 dlang-prs               || (C# Wrapper)         ||: 73ms
 FraGag.Compression.Prs  || Byte Array/Fastest   ||: 105ms
 -------------------------------------------------------------
@@ -306,6 +317,7 @@ Name                    ||Search Buf. Size|| Notes                  ||  Time    
 dlang-prs               ||(0x7FF window)  ||(C# Wrapper)            ||: 29ms    | 19,748 bytes    | 14.6%
 dlang-prs               ||(0x1FFF window) ||(C# Wrapper)            ||: 79ms    | 18,497 bytes    | 13.6%
 FraGag.Compression.Prs  ||(0x1FF0 window) || MemoryStream/Fastest   ||: 113ms   | 18,368 bytes    | 13.5%
+prs-util                ||(0x1FFF window) ||                        ||: 464ms   | 18,788 bytes    | 13.8%
 ---------------------------------------------------------------------------------------------------------
 
 Compress X86:
@@ -323,6 +335,7 @@ Decompress X64:
 -------------------------------------------------------------
 Name                    || Notes                ||  Time    |
 -------------------------------------------------------------
+prs-util                ||                      ||: <1ms
 dlang-prs               || (C# Wrapper)         ||: 4ms
 FraGag.Compression.Prs  || Byte Array/Fastest   ||: 5ms
 -------------------------------------------------------------
@@ -348,6 +361,7 @@ Name                    ||Search Buf. Size|| Notes                  ||  Time    
 dlang-prs               ||(0x7FF window)  ||(C# Wrapper)            ||: 80ms    | 85,079 bytes    | 50.1%
 dlang-prs               ||(0x1FFF window) ||(C# Wrapper)            ||: 238ms   | 74,890 bytes    | 44.1%
 FraGag.Compression.Prs  ||(0x1FF0 window) || MemoryStream/Fastest   ||: 385ms   | 73,900 bytes    | 43.5%
+prs-util                ||(0x1FFF window) ||                        ||: 417ms   | 77,237 bytes    | 45.5%
 ---------------------------------------------------------------------------------------------------------
 
 Compress X86:
@@ -364,6 +378,7 @@ Decompress X64:
 -------------------------------------------------------------
 Name                    || Notes                ||  Time    |
 -------------------------------------------------------------
+dlang-prs               ||                      ||: 1ms
 dlang-prs               || (C# Wrapper)         ||: 5ms
 FraGag.Compression.Prs  || Byte Array/Fastest   ||: 6ms
 -------------------------------------------------------------
