@@ -5,5 +5,9 @@
 	],
 	"description": "A port of basic PRS compressor + decompressor written to the D language.",
 	"copyright": "Copyright © 2018, Sewer56",
-	"license": "GPLV3"
+	"license": "GPLV3",
+	"targetName": "dlang-prs",
+	"targetType": "executable",
+	"targetPath": "build\\dlang-prs",
+	"mainSourceFile": "source\\app.d",
 }

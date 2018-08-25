@@ -22,6 +22,8 @@
 module prs.decompress;
 import std.container.array;
 import std.typecons;
+import prs.estimate;
+import std.algorithm.mutation;
 
 /**
     Stores the current instance of the control byte which will have various variable length
@@ -40,6 +42,10 @@ private int currentBitPosition = 0;
 */
 private int pointer = 0;
 
+private int destinationPointer = 0;
+byte[] destination;
+byte[] source;
+
 /**
     Decompresses a supplied array of PRS compressed bytes and
     returns a decompressed copy of said bytes.
@@ -47,43 +53,50 @@ private int pointer = 0;
     Params:
     source = An array of bytes read containing a PRS compressed file or structure.
 */
-public Array!byte decompress(ref byte[] source)
+public byte[] decompress(ref byte[] dataSource)
 {
+    // Get file size of file to be decompressed.
+    source = dataSource;
+
 	// Initialize variables.
 	pointer = 0;
-	controlByte = readByte(source);
+	controlByte = readByte();
 	currentBitPosition = 0;
-	auto destination = Array!byte();
-    destination.reserve(250000); // 250KB
+	destination = new byte[source.length * 4]; // Safe estimate.
 
 	// Endlessly iterate over the file until the end of file signature/opcode special combo is hit.
 	while (true)
 	{
+        // If it was not safe then, well, we have to :/
+        if (destinationPointer + 256 > destination.length)
+            destination.length *= 4;
+
 		// Test for Direct Byte (Opcode 1)
-		if (retrieveControlBit(source) == 1)
+		if (retrieveControlBit() == 1)
 		{
 			// Write direct byte.
-			destination.insert(readByte(source));
-			continue;
+			destination[destinationPointer] = readByte();   
+            destinationPointer += 1;
+            continue;
 		}
 
 		// Opcode 1 failed, now testing for Opcode 0X
 		// Test for Opcode 01
-		if (retrieveControlBit(source) == 1)
+		if (retrieveControlBit() == 1)
 		{
 			// Write long copy, break if it's end of file.
-			if (writeLongCopy(source, destination))
+			if (writeLongCopy())
 				break;
 		}
 		// Do Opcode 00
 		else
 		{
-			writeShortCopy(source, destination);
+			writeShortCopy();
 		}
 	}
 
 	// Return back
-	return destination;
+	return destination[0 .. destinationPointer];
 }
 
 /**
@@ -97,12 +110,12 @@ public Array!byte decompress(ref byte[] source)
     source = Source array to PRS shortcopy from.
     destination = Destination array to perform the copy operation to.
 */
-public bool writeLongCopy(ref byte[] source, ref Array!byte destination)
+public bool writeLongCopy()
 {
 	// Obtain the offset and size packed combination.
-	int offset	=	readByte(source);		// Dlang will return negative number, e.g. ff ff ff 88 when only 88 is read because of signed bytes being default.
-	// Readbyte has been modified to return unsigned only
-	offset		|=	readByte(source) << 8;	   
+	int offset	=	readByte();		// Dlang will return negative number, e.g. ff ff ff 88 when only 88 is read because of signed bytes being default.
+	                                // Readbyte has been modified to return unsigned only
+	offset		|=	readByte() << 8;	   
 
 	// Check for decompression end condition.
 	if (offset == 0)
@@ -111,21 +124,21 @@ public bool writeLongCopy(ref byte[] source, ref Array!byte destination)
 	// Separate the size from the offset and calculate the actual offset.
 	int length = offset & 0b111;
 	offset = (offset >> 3) | -0x2000;	// When packing, we have lost the contents of the initial bits when left shifting which make
-	// our offset negative (8192 - offset = actual offset)
-	// Here we simply re-add those bits back to get our actual offset.
+	                                    // our offset negative (8192 - offset = actual offset)
+	                                    // Here we simply re-add those bits back to get our actual offset.
 
 	// Check if Mode 3 (Long Copy Large)
 	if (length == 0)
 	{ 
 		// Get length from next byte and increment.
-		length = readByte(source); 
+		length = readByte(); 
 		length += 1;
 	} 
 	else							   // Otherwise Mode 2 (Long Copy Short)
 	{ length += 2; }				   // Offset length by 2 a packed.
 
 	// LZ77 Write to Destination
-	lz77Copy(destination, length, offset);
+	lz77Copy(length, offset);
 	return false;
 }
 
@@ -137,25 +150,25 @@ public bool writeLongCopy(ref byte[] source, ref Array!byte destination)
     source = Source array to PRS shortcopy from.
     destination = Destination array to perform the copy operation to.
 */
-public void writeShortCopy(ref byte[] source, ref Array!byte destination)
+public void writeShortCopy()
 {
 	// Use a shorter variable name for simplification. (Compiler will optimize this out in release mode)
 	int length = 0;
 
 	// Get our length for the jump.
-	length =  length		| retrieveControlBit(source); // The second bit comes first.
+	length =  length		| retrieveControlBit(); // The second bit comes first.
 	length =  length << 1;								  // Small hint to the compiler.
-	length =  length		| retrieveControlBit(source); // Then the first bit.
+	length =  length		| retrieveControlBit(); // Then the first bit.
 
 	// Offset the value back by 2.
 	length += 2;
 
 	// Obtain the offset.
-	int offset = readByte(source) | -0x100; // -0x100 converts from `256 - positive offset` to `negative offset`
-	                                        // We lost our sign when we originally wrote the offset.
+	int offset = readByte() | -0x100; // -0x100 converts from `256 - positive offset` to `negative offset`
+	                                  // We lost our sign when we originally wrote the offset.
 
 	// LZ77 Write to Destination
-	lz77Copy(destination, length, offset);
+	lz77Copy(length, offset);
 }
 
 /**
@@ -163,22 +176,31 @@ public void writeShortCopy(ref byte[] source, ref Array!byte destination)
     and offset. The final byte index of the destination is used for declaring the position from which
     the look behind operation is performed.
 */
-pragma(inline, true)
-public void lz77Copy(ref Array!byte destination, int length, int offset)
+public void lz77Copy(int length, int offset)
 {
 	// Contains the pointer to the destination array from which to perform the look back for bytes to copy from.
-	int copyStartPosition = cast(int)((destination.length) + offset); // offset is negative
+	int copyStartPosition = destinationPointer + offset; // offset is negative
 
-	// Copy to destination.
-	for (int x = 0; x < length; x++)
-		destination.insert(destination[copyStartPosition + x]);
+    // Minimal vector optimizations.
+    if (copyStartPosition + length < destinationPointer)
+    {
+        destination[destinationPointer .. destinationPointer + length] = destination[copyStartPosition .. copyStartPosition + length];
+    }
+    else 
+    {
+        for (int x = 0; x < length; x++)
+            destination[destinationPointer + x] = destination[copyStartPosition + x];      
+    }
+
+    destinationPointer += length;
 }
 
 /**
     Reads a byte from the location specified by the module local
     variable pointer and automatically increments the pointer value.
 */
-public ubyte readByte(ref byte[] source)
+pragma(inline, true)
+public ubyte readByte()
 {
 	ubyte returnValue = source[pointer];
 	pointer += 1;
@@ -190,13 +212,13 @@ public ubyte readByte(ref byte[] source)
     set controlByte. Fetches the next controlByte and reads
     the first bit if the current controlByte is exhausted.
 */
-public int retrieveControlBit(ref byte[] source)
+public int retrieveControlBit()
 {
 	// Once we are exhausted out of bits, we need to read the next one from our stream.
 	if (currentBitPosition >= 8)
 	{
 		// Get new controlByte and reset bit position.
-		controlByte = readByte(source);
+		controlByte = readByte();
 		currentBitPosition = 0;
 	}
 

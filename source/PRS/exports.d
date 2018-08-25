@@ -19,6 +19,7 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
 
+
 module prs.exports;
 
 import prs.estimate;
@@ -37,7 +38,7 @@ import core.sync.mutex;
 
 	Users of the library should copy the byte array in their own programming language 
 	to a native array upon receiving it and then call clear() to clear this list of pointers, 
-	permitting Garbage Collection. 
+	permitting Garbage Collection.
 */
 public struct ByteArray 
 { 
@@ -55,7 +56,7 @@ public struct ByteArray
 	Used for storing references to individual arrays of bytes which contain
 	our compressed files to be used by external libraries.
 */
-public Array!(Array!byte) files;
+public Array!(byte[]) files;
 
 /**
 	Controls accesses to the array of byte arrays containing data 
@@ -82,8 +83,12 @@ public shared Mutex mutex;
 */
 export extern(C) ByteArray externCompress(byte* data, int length, int searchBufferSize)
 {
+    // Need to create Mutex and/or enable GC.
+	if (mutex is null) { enableMutex(); }
+
 	byte[] passedData = data[0 .. length];	
 	auto compressedData = compress(passedData, searchBufferSize);
+
 	addFile(compressedData);
 
  	return ByteArray(cast(int)compressedData.length, &compressedData[0]);
@@ -91,14 +96,13 @@ export extern(C) ByteArray externCompress(byte* data, int length, int searchBuff
 
 /**
 	Clears the arrays used for temporary storage from memory.
-	More specifically, removes the array instances that were passed into your C/C++/C# etc. code
+	More specifically, removes the array instances that were passed into your C/CPP/C# etc. code
 	from memory.
 */
 export extern(C) void clearFiles()
 {
-	// Conditional mutex creation.
-	if (mutex is null)
-	{ enableMutex(); }
+    // Need to create Mutex and/or enable GC.
+	if (mutex is null) { enableMutex(); }
 
 	mutex.lock_nothrow();
 
@@ -112,17 +116,13 @@ export extern(C) void clearFiles()
 
 /**
 	Adds an array of bytes into the array of
-	the array of bytes storing data for external C/C++/C# code.
+	the array of bytes storing data for external C/CPP/C# code.
 
 	Params:
 	file = The file to add to the array of files.
 */
-public void addFile(ref Array!byte file)
+public void addFile(byte[] file)
 {
-	// Conditional mutex creation.
-	if (mutex is null)
-	{ enableMutex(); }
-
 	mutex.lock_nothrow();
 	files.insert(file);
 	mutex.unlock_nothrow();
@@ -149,6 +149,9 @@ public void enableMutex()
 */
 export extern(C) ByteArray externDecompress(byte* data, int length)
 {
+    // Need to create Mutex and/or enable GC.
+	if (mutex is null) { enableMutex(); }
+
 	byte[] passedData = data[0 .. length];
 	auto decompressedData = decompress(passedData);
 	addFile(decompressedData);

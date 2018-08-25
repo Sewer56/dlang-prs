@@ -7,6 +7,8 @@ import prs.compress;
 import prs.decompress;
 import prs.estimate;
 import std.datetime.stopwatch;
+import std.container.array;
+import core.thread;
 
 /*
 	[Visual D]
@@ -17,42 +19,48 @@ void main()
 {
 	// Whoohoo!
 	writeln("Benchmark Start!");
+    
+    Thread.sleep(dur!("msecs")( 1000 ));
 
 	// Read
-	byte[] original = cast(byte[])read("test.bin");
+	byte[] original = cast(byte[])read("compressme.bin");
+    byte[] prsFile;
 
 	// Compress
 	void compbench() 
 	{ 
 		// 1/4 search buffer size, use 1FFF for benchmarking against other implementations.
-		auto prsFile = compress(original, 0x7ff); 
-		std.file.write("testd.prs", (&prsFile[0])[0 .. prsFile.length]);
+		prsFile = compress(original, 0x0); 
 	}
 
 	// Benchmark
-	auto compDurations = benchmark!(compbench)(10);
+	auto compDurations = benchmark!(compbench)(1);
 	writeln("Compress: " ~ compDurations[0].toString());
+    std.file.write("compressed.prs", (&prsFile[0])[0 .. prsFile.length]);
 
 	// Read
-	byte[] compressed = cast(byte[])read("testd.prs");
+	byte[] compressed = cast(byte[])read("decompressme.prs");
+    byte[] decompressed;
 
 	// Decompress
 	void decompbench() 
 	{ 
-		auto decompFile = decompress(compressed); 
-		std.file.write("testdnew.bin", (&decompFile[0])[0 .. decompFile.length]);
+		decompressed = decompress(compressed); 
 	}
 
+    // Benchmark
+    auto decompDurations = benchmark!(decompbench)(1);
+	writeln("Decompress: " ~ decompDurations[0].toString());
+    std.file.write("decompressed.bin", decompressed);
+    
     // Estimate
 	int estimatebench() 
 	{ 
 		return estimate(compressed);
 	}
 
-	auto decompDurations = benchmark!(decompbench)(10);
-	writeln("Decompress: " ~ decompDurations[0].toString());
-
-    auto estimateDurations = benchmark!(estimatebench)(10);
+    // Benchmark
+    auto estimateDurations = benchmark!(estimatebench)(1);
 	writeln("Estimate: " ~ estimateDurations[0].toString());
 
 	// Hang (testing)
