@@ -389,6 +389,9 @@ A Windows executable is ideal for this kind of test as it contains all sorts of 
 | Uncompressed | N/A     | 169,637         |
 | 0x00         | 1.24    | 190,844         |
 
+![Graph A](https://raw.githubusercontent.com/sewer56lol/dlang-prs/master/images/SlidingWindowScaling.png)
+![Graph B](https://raw.githubusercontent.com/sewer56lol/dlang-prs/master/images/SlidingWindowScaling2.png)
+![Graph C](https://raw.githubusercontent.com/sewer56lol/dlang-prs/master/images/SlidingWindowScaling3.png)
 
 # The End
 
