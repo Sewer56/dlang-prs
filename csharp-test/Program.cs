@@ -20,15 +20,18 @@ namespace csharp_test
 
             // Preload file
             byte[] test = File.ReadAllBytes("test.bin");
-            Prs.Release(); // We have nothing to release, just want to initialize the wrapper and do a JIT warmup.
 
             // Benchmark: Compress 1/4 search buffer size and write to file
             stopwatch.Start();
-            File.WriteAllBytes("test.prs", Prs.Compress(ref test, 0x7FF));
+            byte[] compressed = Prs.Compress(ref test, 0x7FF);
             stopwatch.Stop();
 
+            // Decompressed
+            File.WriteAllBytes("zcompressed.prs", compressed);
+            byte[] decompressed = Prs.Decompress(ref compressed);
+            File.WriteAllBytes("zdecompressed.prs", decompressed);
+
             // Actually release memory (check if it works)
-            Prs.Release();
             GC.Collect();
 
             // Show results

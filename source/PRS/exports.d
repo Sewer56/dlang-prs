@@ -30,6 +30,8 @@ import core.memory;
 import std.stdio;
 import std.range;
 import core.sync.mutex;
+import core.stdc.stdlib;
+import core.stdc.string;
 
 /**
 	A simple structure that stores a length and a pointer to the data of a generic array.
@@ -52,16 +54,22 @@ public struct ByteArray
 	}
 }
 
-/**
-	Used for storing references to individual arrays of bytes which contain
-	our compressed files to be used by external libraries.
-*/
-public Array!(byte[]) files;
 
 /**
-	Controls accesses to the array of byte arrays containing data 
+    Enables the dlang garbage collector and sets up a new mutex object.
 */
-public shared Mutex mutex;
+export extern(C) void initialize()
+{
+	GC.enable;
+}
+
+/**
+    Exposes the free function belonging to the C standard library.
+*/
+export extern(C) void nativeFree(void* memoryLocation)
+{
+    free(memoryLocation);
+}
 
 /**
 	Compresses a supplied byte array.
@@ -83,58 +91,14 @@ public shared Mutex mutex;
 */
 export extern(C) ByteArray externCompress(byte* data, int length, int searchBufferSize)
 {
-    // Need to create Mutex and/or enable GC.
-	if (mutex is null) { enableMutex(); }
-
 	byte[] passedData = data[0 .. length];	
 	auto compressedData = compress(passedData, searchBufferSize);
 
-	addFile(compressedData);
+    // Malloc and copy byte array.
+    void* memoryLocation = malloc(compressedData.length);
+    memcpy(memoryLocation, &compressedData[0], compressedData.length);
 
- 	return ByteArray(cast(int)compressedData.length, &compressedData[0]);
-}
-
-/**
-	Clears the arrays used for temporary storage from memory.
-	More specifically, removes the array instances that were passed into your C/CPP/C# etc. code
-	from memory.
-*/
-export extern(C) void clearFiles()
-{
-    // Need to create Mutex and/or enable GC.
-	if (mutex is null) { enableMutex(); }
-
-	mutex.lock_nothrow();
-
-	// Destroys each of the stored compressed/files and empties their list.
-	for (int x = 0; x < files.length; x++)
-	{ destroy(files[x]); }
-
-	files.clear();
-	mutex.unlock_nothrow();
-}
-
-/**
-	Adds an array of bytes into the array of
-	the array of bytes storing data for external C/CPP/C# code.
-
-	Params:
-	file = The file to add to the array of files.
-*/
-public void addFile(byte[] file)
-{
-	mutex.lock_nothrow();
-	files.insert(file);
-	mutex.unlock_nothrow();
-}
-
-/**
-	Enables the dlang garbage collector and sets up a new mutex object.
-*/
-public void enableMutex()
-{
-	GC.enable;
-	mutex = new shared Mutex();
+ 	return ByteArray(cast(int)compressedData.length, memoryLocation);
 }
 
 /**
@@ -149,14 +113,14 @@ public void enableMutex()
 */
 export extern(C) ByteArray externDecompress(byte* data, int length)
 {
-    // Need to create Mutex and/or enable GC.
-	if (mutex is null) { enableMutex(); }
-
 	byte[] passedData = data[0 .. length];
 	auto decompressedData = decompress(passedData);
-	addFile(decompressedData);
 
-	return ByteArray(cast(int)decompressedData.length, &decompressedData[0]);
+    // Malloc and copy byte array.
+    void* memoryLocation = malloc(decompressedData.length);
+    memcpy(memoryLocation, &decompressedData[0], decompressedData.length);
+
+	return ByteArray(cast(int)decompressedData.length, memoryLocation);
 }
 
 /**

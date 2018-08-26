@@ -35,14 +35,14 @@ private byte controlByte;
     Defines the index of the next control bit of the active control byte that is
     to be modified by the compressor in question.	
 */
-private int currentBitPosition = 0;
+private int currentBitPosition;
 
 /**
     Specifies the current offset from the start of the file used during compression.
 */
-private int pointer = 0;
+private int pointer;
 
-private int destinationPointer = 0;
+private int destinationPointer;
 byte[] destination;
 byte[] source;
 
@@ -60,6 +60,7 @@ public byte[] decompress(ref byte[] dataSource)
 
 	// Initialize variables.
 	pointer = 0;
+    destinationPointer = 0;
 	controlByte = readByte();
 	currentBitPosition = 0;
 	destination = new byte[source.length * 4]; // Safe estimate.

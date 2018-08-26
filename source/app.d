@@ -30,7 +30,7 @@ void main()
 	void compbench() 
 	{ 
 		// 1/4 search buffer size, use 1FFF for benchmarking against other implementations.
-		prsFile = compress(original, 0x0); 
+		prsFile = compress(original, 0x1FFF); 
 	}
 
 	// Benchmark
