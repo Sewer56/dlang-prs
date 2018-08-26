@@ -114,15 +114,15 @@ alias LZ77Properties = Tuple!(int, "offset", int, "length");
 								Changing this value has no noticeable effect on decompression time.
 						   
 */
-public Array!byte compress(ref byte[] source, int searchBufferSize = 0x1FFF)
+public byte[] compress(ref byte[] source, int searchBufferSize = 0x1FFF)
 {
 	// Assume our compressed file will be at least of equivalent length.
 	auto destination = Array!byte();
-	destination.reserve(cast(int)((source.length * 1.20F) + 1));
+	destination.reserve(cast(int)((source.length * 1.15F) + 3));
 
-	// Theoretical worst scenario for PRS compression is 9/8, 112.5% size
+	// Theoretical worst scenario for PRS compression is 9/8, 112.5% size + 3 bytes
 	// This is when every byte cannot get a copy back.
-	// Just in case, I will be very generous and give 120%, + 1 byte
+	// Just in case, I will be very generous and give 115%, + 3 bytes
 
 	// Setup control byte.
 	destination.insertBack(cast(byte) 0x00);
@@ -158,7 +158,7 @@ public Array!byte compress(ref byte[] source, int searchBufferSize = 0x1FFF)
 	destination.insert(cast(byte)0x00);
 
 	// Return back
-	return destination;
+	return (&destination[0])[0 .. destination.length].dup;
 }
 
 /**

@@ -1,7 +1,13 @@
 ﻿
+# Changelog
+	25-Aug-2018: Testing methodology changed to not include file write times in compression/decompression. All benchmarks have been retaken.
+	24-Aug-2018: Decompression speed of dlang-prs improved by up to 33%.
+	24-Aug-2018: prs-util [X64] added to benchmarks.
+	
+
 # Notice
 
-After finishing this project, I have learned to witness that apparently this also exists, https://github.com/playegs/prs which meant my work was for naught, nonetheless - I am still publishing this regardless as another alternative, unchanged from the original text below. Have fun ^-^.
+After finishing this project, I have learned to witness that apparently this also exists, https://github.com/playegs/prs which meant my documentation work was (partially) for naught, nonetheless - I am still publishing this regardless as another alternative, unchanged from the original text below. Have fun ^-^.
 
 # A Brief History
 
@@ -15,7 +21,7 @@ After finishing this project, I have learned to witness that apparently this als
     A few years later, one named fuzziqer has also produced a compressor and decompressor combo, this time with a source release
     and a compressor which did actual compression. While the source did not ship with a license, and the author stated that 
     using the source freely was fine as long as he would have been credited for the compression and decompression code,
-    the source was not very well documented - as to truely describe the format and was not trivial to follow.
+    the source was not very well documented - as to truly describe the format and was not trivial to follow.
 
     Aaaand well... FraGag ported fuzziqer's utility to .NET and that's about it... nothing...
 
@@ -169,232 +175,223 @@ After finishing this project, I have learned to witness that apparently this als
 
     An additional byte is appended onto the stream/file/byte array which contains
     the length of the match (size) minus 1.
-    
+      
 # Benchmarks
 
-```
-Benchmarks:
-
-CPU: i7 4790k @ 4.5GHz
-RAM: 24GB CL9 1866MHz 
+- CPU: i7 4790k @ 4.5GHz
+- RAM: 24GB CL9 1866MHz 
 
 Each benchmark is an average of 5 runs.
-Benchmark consists of compressing/decompressing a file and writing
-it onto a solid state drive.
-
-As the window size for FraGag.Compression.Prs is not modifiable, only 
-the default has been included. For FraGag.Compression.Prs, the fastest code path/overload
-has been used for compression/decompression, being the array and MemoryStream path respectively.
+Benchmark consists of compressing/decompressing a file in memory.
 
 Decompression benchmarks are performed on files output by FraGag.Compression.Prs.
-All percentages are rounded down (I'm lazy).
 
-dlang-prs has been compiled under LDC2 (LDC 1.11.0-beta1)
-prs-util (https://github.com/Isaac-Lozano/SA2-utils) has been compiled with `opt-level = 3`
-and `RUSTFLAGS="-C target-cpu=native"`.
+## Contestants:
 
-The results show a best case scenario (I know of) for every PRS Compressor/Decompressor.
+- **FraGag.Compression.Prs**: Compiled under newest .NET Framework at the time of testing (4.7.2).
+- **dlang-prs**: Compiled under LDC2 (LDC 1.11.0-beta2).
+- **prs-util** (OnVar/Rust): Compiled with `opt-level = 3` and `RUSTFLAGS="-C target-cpu=native" on the nightly toolchains.
 
---------------------------------
-tl;dr Head to head.
-Aggregated from arbitrary tests below.
-In relative decompression speed, the smaller size tests are ignored because I did not measure 
-time accurately enough (4ms and 5ms aren't relatively speaking accurate enough for proper comparison).
+### Not benchmarking:
+- **prsutil** (Essen/Erlang): Not familliar with Erlang *enough*.
+- **fuzziqer's utility**: Failed to compile on Windows. Using Linux results would not be representative. Algorithmically identical to FraGag.Compression.Prs but in C++.
+						
+### Extra Notes
+**FraGag.Compression.Prs**: The highest performing overloads of the Compress/Decompress method have been used. To be precise, the overloads using MemoryStream under the hood (accepting byte arrays). The FileStream overloads are very slow.
 
-X64 Compression:
+**dlang-prs** is the only compressor which has an option of manually setting the sliding window size for compression, allowing for a speed-compression ratio adjustment.
 
---------------------------------------------------------------------------------------------
-Name                      | Relative Speed % | Relative Size % | Average Compression Ratio %
---------------------------------------------------------------------------------------------
-prs-util                  | 67.8             | 103.9           | 39.1
-FraGag.Compression.Prs    | 100              | 100             | 37.4
-dlang-prs (Wrapper)       | 151.8            | 101.7           | 38.2
-dlang-prs (0x7FF Buffer)  | 452.7            | 112.0           | 42.5
---------------------------------------------------------------------------------------------
-
-Note: The medium, highly compressible file is a huge outlier for prs-util, at 24.3% relative speed.
-The other two tests have 86.9% and 92.3% respectively.
-
-X86 Compression:
-
---------------------------------------------------------------------------------------------
-Name                      | Relative Speed % | Relative Size % | Average Compression Ratio %
---------------------------------------------------------------------------------------------
-FraGag.Compression.Prs    | 100              | 100             | 37.4
-dlang-prs (Wrapper)       | 268.7            | 101.7           | 38.2
-dlang-prs (0x7FF Buffer)  | 806.6            | 112.0           | 42.5
---------------------------------------------------------------------------------------------
-
-X64 Decompression:
-
-----------------------------------------------
-Name                      | Relative Speed % |
-----------------------------------------------
-prs-util                  | 494.5% (estimate)|
-FraGag.Compression.Prs    | 100              |
-dlang-prs (Wrapper)       | 143.8            |
-----------------------------------------------
-
-*Estimate: A value of 0.7 for highly compressible file decompression time was assumed based on the
-following similar benchmark (Medium compression). The large file decompressed at 169.7% speed. 
-From extra testing beyond this document - the smaller the file, the greater the advantage prs-util had.
-
-X86 Decompression:
-
-----------------------------------------------
-Name                      | Relative Speed % |
-----------------------------------------------
-FraGag.Compression.Prs    | 100              |
-dlang-prs (Wrapper)       | 167.5            |
-----------------------------------------------
-
-I can't get fuzziqer's original implementation compiled so I couldn't add it here.
+C# implementations were measured using *System.Diagnostics.Stopwatch*.
+D implementations were measured using *benchmark()*
+Rust implementations were measured using https://github.com/ellisonch/rust-stopwatch
 
 --------------------------------
-Large, Windows Executable
-TSonic_win.exe (5,132,288 bytes)
+## X64 Compression
 
-Compress X64:
----------------------------------------------------------------------------------------------------------
-Name                    ||Search Buf. Size|| Notes                  ||  Time    | Final Size      | % orig size
----------------------------------------------------------------------------------------------------------
-dlang-prs               ||(0x1FFF window) ||(C# Wrapper)            ||: 9551ms  | 2,931,322 bytes | 57.1%
-dlang-prs               ||(0x1FFF window) ||                        ||: 9573ms  | 2,931,322 bytes | 57.1%
-FraGag.Compression.Prs  ||(0x1FF0 window) || MemoryStream/Fastest   ||: 14384ms | 2,838,425 bytes | 55.3%
-prs-util                ||(0x1FFF window) ||                        ||: 16544ms | 2,987,736 bytes | 58.2%
----------------------------------------------------------------------------------------------------------
+### Windows Executable, Mixed Compression
+TSonic_win.exe: 5,132,288 bytes. (Sonic Heroes' executable)
 
-Compress X86:
+| Compressor | Notes         | Time/ms | Compression Ratio/% | Final Size/bytes |
+|------------|---------------|:-------:|---------------------|------------------|
+| dlang-prs  | 0x7FF Window  | 2998    | 62.83               | 3,224,642        |
+| dlang-prs  | 0x1FFF Window | 9652    | 57.11               | 2,931,333        |
+| Prs.NET    | 0x1FF0 Window | 14483   | 55.30               | 2,838,437        |
+| prs-util   | 0x1FFF Window | 16535   | 58.21               | 2,987,736        |
 
----------------------------------------------------------------------------------------------------------
-Name                    ||Search Buf. Size|| Notes                  ||  Time    | Final Size      | % orig size
----------------------------------------------------------------------------------------------------------
-dlang-prs               ||(0x1FFF window) ||(C# Wrapper)            ||: 9498ms  | 2,931,322 bytes | 57.1%
-dlang-prs               ||(0x1FFF window) ||                        ||: 9510ms  | 2,931,322 bytes | 57.1%
-FraGag.Compression.Prs  ||(0x1FF0 window) || MemoryStream/Fastest   ||: 27779ms | 2,838,425 bytes | 55.3%
----------------------------------------------------------------------------------------------------------
+### Medium Size, Highly Compressible
+s01_P1.bin: 135,168 bytes
+Sonic Heroes object layout - huge lot of 0s.
 
-Sliding Window Speed-Size Scaling (X64):
+| Compressor | Notes         | Time/ms | Compression Ratio/% | Final Size/bytes |
+|------------|---------------|:-------:|---------------------|------------------|
+| dlang-prs  | 0x7FF Window  | 28      | 14.61               | 19,748           |
+| dlang-prs  | 0x1FFF Window | 83      | 13.68               | 18,497           |
+| Prs.NET    | 0x1FF0 Window | 109     | 13.59               | 18,368           |
+| prs-util   | 0x1FFF Window | 472     | 13.90               | 18,788           |
 
+### Medium Size, Realistic Use Case
+VECTOR_LOCATOR.DFF: 169,637 bytes
+Medium, RenderWare Clump Model/Stream
 
---------------------------------------------------------------------------------------
-Name      ||Search Buf. Size|| Notes       ||  Time    | Final Size      | % orig size
---------------------------------------------------------------------------------------
-dlang-prs ||(0xFF window)   ||(C# Wrapper) ||: 590ms   | 3,717,600 bytes | 72.4%
-dlang-prs ||(0xFF window )  ||             ||: 622ms   | 3,717,600 bytes | 72.4%
-dlang-prs ||(0x400 window)  ||(C# Wrapper) ||: 1683ms  | 3,386,713 bytes | 65.9%
-dlang-prs ||(0x400 window)  ||             ||: 1740ms  | 3,386,713 bytes | 65.9%
-dlang-prs ||(0x7FF window)  ||(C# Wrapper) ||: 2951ms  | 3,224,633 bytes | 62.8%
-dlang-prs ||(0x7FF window)  ||             ||: 3027ms  | 3,224,633 bytes | 62.8%
-dlang-prs ||(0x1FFF window) ||(C# Wrapper) ||: 10460ms | 2,931,322 bytes | 57.1%
-dlang-prs ||(0x1FFF window) ||             ||: 10540ms | 2,931,322 bytes | 57.1%
---------------------------------------------------------------------------------------
+| Compressor | Notes         | Time/ms | Compression Ratio/% | Final Size/bytes |
+|------------|---------------|:-------:|---------------------|------------------|
+| dlang-prs  | 0x7FF Window  | 82      | 50.15               | 85,079           |
+| dlang-prs  | 0x1FFF Window | 254     | 44.15               | 74,890           |
+| Prs.NET    | 0x1FF0 Window | 367     | 43.56               | 73,900           |
+| prs-util   | 0x1FFF Window | 419     | 45.53               | 77,237           |
 
-Decompress X64:
+## X86 Compression
 
--------------------------------------------------------------
-Name                    || Notes                ||  Time    |
--------------------------------------------------------------
-prs-util                ||                      ||: 43ms
-dlang-prs               || (C# Wrapper)         ||: 73ms
-FraGag.Compression.Prs  || Byte Array/Fastest   ||: 105ms
--------------------------------------------------------------
+### Windows Executable, Mixed Compression
+TSonic_win.exe: 5,132,288 bytes. (Sonic Heroes' executable)
 
-Decompress X86:
+| Compressor | Notes         | Time/ms | Compression Ratio/% | Final Size/bytes |
+|------------|---------------|:-------:|---------------------|------------------|
+| dlang-prs  | 0x7FF Window  | 4093    | 62.83               | 3,224,642        |
+| dlang-prs  | 0x1FFF Window | 13339   | 57.11               | 2,931,333        |
+| Prs.NET    | 0x1FF0 Window | 28091   | 55.30               | 2,838,437        |
+| prs-util   | 0x1FFF Window | 26815   | 58.21               | 2,987,736        |
 
--------------------------------------------------------------
-Name                    || Notes                ||  Time    |
--------------------------------------------------------------
-dlang-prs               || (C# Wrapper)         ||: 77ms
-FraGag.Compression.Prs  || Byte Array/Fastest   ||: 129ms
--------------------------------------------------------------
+### Medium Size, Highly Compressible
+s01_P1.bin: 135,168 bytes
+Sonic Heroes object layout - huge lot of 0s.
 
----------------------------------
-Medium, Highly Compressible
-s01_P1.bin (135,168 bytes) | Sonic Heroes object layout, highly compressible.
+| Compressor | Notes         | Time/ms | Compression Ratio/% | Final Size/bytes |
+|------------|---------------|:-------:|---------------------|------------------|
+| dlang-prs  | 0x7FF Window  | 39      | 14.61               | 19,748           |
+| dlang-prs  | 0x1FFF Window | 110     | 13.68               | 18,497           |
+| Prs.NET    | 0x1FF0 Window | 179     | 13.59               | 18,368           |
+| prs-util   | 0x1FFF Window | 533     | 13.90               | 18,788           |
 
-Compress X64:
+### Medium Size, Realistic Use Case
+VECTOR_LOCATOR.DFF: 169,637 bytes
+Medium, RenderWare Clump Model/Stream
 
----------------------------------------------------------------------------------------------------------
-Name                    ||Search Buf. Size|| Notes                  ||  Time    | Final Size      | % orig size
----------------------------------------------------------------------------------------------------------
-dlang-prs               ||(0x7FF window)  ||(C# Wrapper)            ||: 29ms    | 19,748 bytes    | 14.6%
-dlang-prs               ||(0x1FFF window) ||(C# Wrapper)            ||: 79ms    | 18,497 bytes    | 13.6%
-FraGag.Compression.Prs  ||(0x1FF0 window) || MemoryStream/Fastest   ||: 113ms   | 18,368 bytes    | 13.5%
-prs-util                ||(0x1FFF window) ||                        ||: 464ms   | 18,788 bytes    | 13.8%
----------------------------------------------------------------------------------------------------------
+| Compressor | Notes         | Time/ms | Compression Ratio/% | Final Size/bytes |
+|------------|---------------|:-------:|---------------------|------------------|
+| dlang-prs  | 0x7FF Window  | 116     | 50.15               | 85,079           |
+| dlang-prs  | 0x1FFF Window | 386     | 44.15               | 74,890           |
+| Prs.NET    | 0x1FF0 Window | 714     | 43.56               | 73,900           |
+| prs-util   | 0x1FFF Window | 665     | 45.53               | 77,237           |
 
-Compress X86:
+## X64 Decompression
+Reminder: The PRS compressed files used for benchmarking decompression are the output of Prs.NET.
 
----------------------------------------------------------------------------------------------------------
-Name                    ||Search Buf. Size|| Notes                  ||  Time    | Final Size      | % orig size
----------------------------------------------------------------------------------------------------------
-dlang-prs               ||(0x7FF window)  ||(C# Wrapper)            ||: 30ms    | 19,748 bytes    | 14.6%
-dlang-prs               ||(0x1FFF window) ||(C# Wrapper)            ||: 82ms    | 18,497 bytes    | 13.6%
-FraGag.Compression.Prs  ||(0x1FF0 window) || MemoryStream/Fastest   ||: 181ms   | 18,368 bytes    | 13.5%
----------------------------------------------------------------------------------------------------------
+TSonic_win.exe
 
-Decompress X64:
+| Compressor | Time/ms |
+|------------|:-------:|
+| dlang-prs  | 28.70   |
+| Prs.NET    | 69.56   |
+| prs-util   | 43.78   |
 
--------------------------------------------------------------
-Name                    || Notes                ||  Time    |
--------------------------------------------------------------
-prs-util                ||                      ||: <1ms
-dlang-prs               || (C# Wrapper)         ||: 4ms
-FraGag.Compression.Prs  || Byte Array/Fastest   ||: 5ms
--------------------------------------------------------------
+s01_P1.bin:
 
-Decompress X86:
+| Compressor | Time/ms |
+|------------|:-------:|
+| dlang-prs  | 0.28    |
+| Prs.NET    | 1.79    |
+| prs-util   | 0.73    |
 
--------------------------------------------------------------
-Name                    || Notes                ||  Time    |
--------------------------------------------------------------
-dlang-prs               || (C# Wrapper)         ||: 4ms
-FraGag.Compression.Prs  || Byte Array/Fastest   ||: 5ms
--------------------------------------------------------------
+VECTOR_LOCATOR.DFF: 
 
----------------------------------
-Medium, RenderWare Stream, Character Model
-VECTOR_LOCATOR.DFF (169,637 bytes)
+| Compressor | Time/ms |
+|------------|:-------:|
+| dlang-prs  | 0.636   |
+| Prs.NET    | 2.213   |
+| prs-util   | 1.411   |
 
-Compress X64:
+## X86 Decompression
+TSonic_win.exe:
 
----------------------------------------------------------------------------------------------------------
-Name                    ||Search Buf. Size|| Notes                  ||  Time    | Final Size      | % orig size
----------------------------------------------------------------------------------------------------------
-dlang-prs               ||(0x7FF window)  ||(C# Wrapper)            ||: 80ms    | 85,079 bytes    | 50.1%
-dlang-prs               ||(0x1FFF window) ||(C# Wrapper)            ||: 238ms   | 74,890 bytes    | 44.1%
-FraGag.Compression.Prs  ||(0x1FF0 window) || MemoryStream/Fastest   ||: 385ms   | 73,900 bytes    | 43.5%
-prs-util                ||(0x1FFF window) ||                        ||: 417ms   | 77,237 bytes    | 45.5%
----------------------------------------------------------------------------------------------------------
+| Compressor | Time/ms |
+|------------|:-------:|
+| dlang-prs  | 31.97   |
+| Prs.NET    | 101.79  |
+| prs-util   | 55.63   |
 
-Compress X86:
+s01_P1.bin:
 
----------------------------------------------------------------------------------------------------------
-Name                    ||Search Buf. Size|| Notes                  ||  Time    | Final Size      | % orig size
----------------------------------------------------------------------------------------------------------
-dlang-prs               ||(0x7FF window)  ||(C# Wrapper)            ||: 81ms    | 85,079 bytes    | 50.1%
-dlang-prs               ||(0x1FFF window) ||(C# Wrapper)            ||: 242ms   | 74,890 bytes    | 44.1%
-FraGag.Compression.Prs  ||(0x1FF0 window) || MemoryStream/Fastest   ||: 709ms   | 73,900 bytes    | 43.5%
----------------------------------------------------------------------------------------------------------
+| Compressor | Time/ms |
+|------------|:-------:|
+| dlang-prs  | 0.29    |
+| Prs.NET    | 2.44    |
+| prs-util   | 0.86    |
 
-Decompress X64:
--------------------------------------------------------------
-Name                    || Notes                ||  Time    |
--------------------------------------------------------------
-dlang-prs               ||                      ||: 1ms
-dlang-prs               || (C# Wrapper)         ||: 5ms
-FraGag.Compression.Prs  || Byte Array/Fastest   ||: 6ms
--------------------------------------------------------------
+VECTOR_LOCATOR.DFF: 
 
-Decompress X86:
--------------------------------------------------------------
-Name                    || Notes                ||  Time    |
--------------------------------------------------------------
-dlang-prs               || (C# Wrapper)         ||: 5ms
-FraGag.Compression.Prs  || Byte Array/Fastest   ||: 7ms
--------------------------------------------------------------
-```
+| Compressor | Time/ms |
+|------------|:-------:|
+| dlang-prs  | 0.654   |
+| Prs.NET    | 3.014   |
+| prs-util   | 1.626   |
+
+## Search Buffer Size Scaling (dlang-prs - X64)
+
+A feature unique to dlang-prs is that it allows you to set the size of the search buffer used for compression; letting the user adjust between compression ratio and speed. Here is a data set of individual tests across each file; mapping the final file size and time taken together.
+
+### TSonic_win; 
+
+| Compressor   | Time/ms | File Size/bytes |
+|--------------|:-------:|-----------------|
+| 0x1FFF       | 9680    | 2,931,333       |
+| 0x1C00       | 8599    | 2,955,088       |
+| 0x1800       | 7543    | 2,983,479       |
+| 0x1400       | 6418    | 3,020,668       |
+| 0x1000       | 5295    | 3,064,558       |
+| 0xC00        | 4212    | 3,128,102       |
+| 0x800        | 2973    | 3,223,750       |
+| 0x400        | 1676    | 3,386,723       |
+| 0xFF         | 563     | 3,717,609       |
+| 0x64         | 295     | 4,048,881       |
+| 0x10         | 108     | 4,900,127       |
+| 0x0A         | 84      | 5,083,734       |
+| Uncompressed | N/A     | 5,132,288       |
+| 0x0          | 40      | 5,773,827       |
+
+A Windows executable is ideal for this kind of test as it contains all sorts of random data and the file contents are very mixed. The result set can be treated as a set of very realistic expectations. 
+
+### s01_P1.bin (Medium Size, Highly Compressible):
+
+| Compressor   | Time/ms | File Size/bytes |
+|--------------|:-------:|-----------------|
+| 0x1FFF       | 77.96   | 18,497          |
+| 0x1C00       | 68.99   | 18,612          |
+| 0x1800       | 60.77   | 18,783          |
+| 0x1400       | 52.98   | 18,936          |
+| 0x1000       | 43.67   | 19,151          |
+| 0xC00        | 35.54   | 19,391          |
+| 0x800        | 27.42   | 19,746          |
+| 0x400        | 16.84   | 20,433          |
+| 0xFF         | 8.20    | 21,980          |
+| 0x64         | 5.92    | 23,554          |
+| 0x10         | 4.64    | 37,768          |
+| 0x0A         | 4.52    | 37,915          |
+| Uncompressed | N/A     | 135,168         |
+| 0x00         | 1.03    | 152,067         |
+
+### VECTOR_LOCATOR.DFF (Medium Size, RW Clump/3D Model):
+
+| Compressor   | Time/ms | File Size/bytes |
+|--------------|:-------:|-----------------|
+| 0x1FFF       | 242.34  | 74,890          |
+| 0x1C00       | 219.17  | 75,346          |
+| 0x1800       | 190.16  | 76,165          |
+| 0x1400       | 171.28  | 77,068          |
+| 0x1000       | 142.81  | 81,219          |
+| 0xC00        | 111.26  | 82,975          |
+| 0x800        | 79.53   | 85,066          |
+| 0x400        | 44.03   | 88,529          |
+| 0xFF         | 14.85   | 94,096          |
+| 0x64         | 7.14    | 102,682         |
+| 0x10         | 3.99    | 123,146         |
+| 0x0A         | 2.37    | 144,389         |
+| Uncompressed | N/A     | 169,637         |
+| 0x00         | 1.24    | 190,844         |
+
+![Graph A](https://raw.githubusercontent.com/sewer56lol/dlang-prs/master/images/SlidingWindowScaling.png)
+![Graph B](https://raw.githubusercontent.com/sewer56lol/dlang-prs/master/images/SlidingWindowScaling2.png)
+![Graph C](https://raw.githubusercontent.com/sewer56lol/dlang-prs/master/images/SlidingWindowScaling3.png)
 
 # The End
 

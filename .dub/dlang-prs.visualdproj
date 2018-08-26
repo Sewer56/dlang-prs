@@ -371,7 +371,7 @@
   <nofloat>0</nofloat>
   <Dversion>2</Dversion>
   <ignoreUnsupportedPragmas>0</ignoreUnsupportedPragmas>
-  <allinst>1</allinst>
+  <allinst>0</allinst>
   <stackStomp>0</stackStomp>
   <compiler>2</compiler>
   <otherDMD>0</otherDMD>
@@ -438,7 +438,7 @@
     <Folder name="PRS">
      <File path="..\source\PRS\compress.d" />
      <File path="..\source\PRS\decompress.d" />
-     <File path="estimate.d" />
+     <File path="..\source\PRS\estimate.d" />
      <File path="..\source\PRS\exports.d" />
     </Folder>
     <File path="..\source\app.d" />

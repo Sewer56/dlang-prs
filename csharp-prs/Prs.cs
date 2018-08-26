@@ -59,16 +59,6 @@ namespace csharp_prs
             return _compressor.externEstimate(data, data.Length);
         }
 
-        /// <summary>
-        /// Free the individual prs compressed/uncompressed byte arrays from
-        /// memory that have been passed back to C# code. Use after you are done
-        /// compressing/decompressing.
-        /// </summary>
-        public static void Release()
-        {
-            _compressor.clearFiles();
-        }
-
         static Prs()
         {
             if (IntPtr.Size == 4)
@@ -80,29 +70,32 @@ namespace csharp_prs
                 _compressor = NativeLibraryBuilder.Default.ActivateInterface<IDlangPrs>(LibraryName64);
             }
             
+            _compressor.initialize();
         }
-    }
 
-
-    /// <summary>
-    /// Simple struct defining a native byte array for interoperability
-    /// with dlang-prs.
-    /// </summary>
-    public struct ByteArray
-    {
-        public int Length;
-        public IntPtr Pointer;
 
         /// <summary>
-        /// Creates a "native", C# garbage collected
-        /// byte array and copies the data returned from native code into it.
+        /// Simple struct defining a native byte array for interoperability
+        /// with dlang-prs.
         /// </summary>
-        /// <returns></returns>
-        public byte[] GetBytes()
+        public struct ByteArray
         {
-            byte[] byteArray = new byte[Length];
-            Marshal.Copy(Pointer, byteArray, 0, Length);
-            return byteArray;
+            public int Length;
+            public IntPtr Pointer;
+
+            /// <summary>
+            /// Creates a "native", C# garbage collected
+            /// byte array and copies the data returned from native code into it.
+            /// </summary>
+            /// <returns></returns>
+            public byte[] GetBytes()
+            {
+                byte[] byteArray = new byte[Length];
+                Marshal.Copy(Pointer, byteArray, 0, Length);
+
+                _compressor.nativeFree(Pointer);
+                return byteArray;
+            }
         }
     }
 
@@ -112,9 +105,10 @@ namespace csharp_prs
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     public interface IDlangPrs
     {
-        ByteArray externCompress(byte[] data, int length, int searchBufferSize);
-        ByteArray externDecompress(byte[] data, int length);
+        Prs.ByteArray externCompress(byte[] data, int length, int searchBufferSize);
+        Prs.ByteArray externDecompress(byte[] data, int length);
         int externEstimate(byte[] data, int length);
-        void clearFiles();
+        void initialize();
+        void nativeFree(IntPtr memoryPointer);
     }
 }
