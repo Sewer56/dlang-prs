@@ -5,6 +5,8 @@
 	24-Aug-2018: prs-util [X64] added to benchmarks.
 	
 
+A C# wrapper for this library is also available on [NuGet](https://www.nuget.org/packages/csharp-prs/).
+
 # Notice
 
 After finishing this project, I have learned to witness that apparently this also exists, https://github.com/playegs/prs which meant my documentation work was (partially) for naught, nonetheless - I am still publishing this regardless as another alternative, unchanged from the original text below. Have fun ^-^.
