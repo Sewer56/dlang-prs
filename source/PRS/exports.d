@@ -33,43 +33,9 @@ import core.sync.mutex;
 import core.stdc.stdlib;
 import core.stdc.string;
 
-/**
-	A simple structure that stores a length and a pointer to the data of a generic array.
-	Intended for exports, made for easy interoperability - actually identical to the current
-	implementation of byte[] in D.
-
-	Users of the library should copy the byte array in their own programming language 
-	to a native array upon receiving it and then call clear() to clear this list of pointers, 
-	permitting Garbage Collection.
-*/
-public struct ByteArray 
-{ 
-	int length; 
-	void* pointer;
-	
-	this(int length, void* pointer)
-	{
-		this.length = length;
-		this.pointer = pointer;
-	}
-}
-
-
-/**
-    Enables the dlang garbage collector and sets up a new mutex object.
-*/
-export extern(C) void initialize()
-{
-	GC.enable;
-}
-
-/**
-    Exposes the free function belonging to the C standard library.
-*/
-export extern(C) void nativeFree(void* memoryLocation)
-{
-    free(memoryLocation);
-}
+// Callback to calling code (in CDECL convention) that allocates and copies to their own array from 
+// a byte* and length combo.
+extern(C) alias CopyMemoryFunctionDefinition = void function(byte*, int);  // D code
 
 /**
 	Compresses a supplied byte array.
@@ -88,17 +54,15 @@ export extern(C) void nativeFree(void* memoryLocation)
 	Increasing this value compresses the data to smaller filesizes at the expense of compression time.
 	Changing this value has no noticeable effect on decompression time.
 
+    allocateMemoryPtr =     A pointer to a CDECL function that copies a region of memory back to its own
+                            buffer given a pointer and length.
 */
-export extern(C) ByteArray externCompress(byte* data, int length, int searchBufferSize)
+export extern(C) void externCompress(byte* data, int length, int searchBufferSize, CopyMemoryFunctionDefinition copyMemoryPtr)
 {
 	byte[] passedData = data[0 .. length];	
 	auto compressedData = compress(passedData, searchBufferSize);
 
-    // Malloc and copy byte array.
-    void* memoryLocation = malloc(compressedData.length);
-    memcpy(memoryLocation, &compressedData[0], compressedData.length);
-
- 	return ByteArray(cast(int)compressedData.length, memoryLocation);
+    copyMemoryPtr(&compressedData[0], cast(int)compressedData.length);
 }
 
 /**
@@ -111,16 +75,13 @@ export extern(C) ByteArray externCompress(byte* data, int length, int searchBuff
 	source =				The byte array containing the file or data to compress.
 	length =				The length of the byte array.
 */
-export extern(C) ByteArray externDecompress(byte* data, int length)
+export extern(C) void externDecompress(byte* data, int length, CopyMemoryFunctionDefinition copyMemoryPtr)
 {
 	byte[] passedData = data[0 .. length];
 	auto decompressedData = decompress(passedData);
 
     // Malloc and copy byte array.
-    void* memoryLocation = malloc(decompressedData.length);
-    memcpy(memoryLocation, &decompressedData[0], decompressedData.length);
-
-	return ByteArray(cast(int)decompressedData.length, memoryLocation);
+    copyMemoryPtr(&decompressedData[0], cast(int)decompressedData.length);
 }
 
 /**

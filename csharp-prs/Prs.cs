@@ -5,19 +5,55 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using AdvancedDLSupport;
 
 namespace csharp_prs
 {
     /// <summary>
     /// Provides a means by which the underlying D language library's functions may be accessed.
-    /// Use the interface <see cref="_compressor"/> to interact with the library.
     /// </summary>
     public static class Prs
     {
-        private const string LibraryName32 = "dlang-prs32";
-        private const string LibraryName64 = "dlang-prs64";
-        private static IDlangPrs _compressor;
+        /* Function redirects to X64/X86 DLL */
+        private static Action<byte[], int, int, CopyArrayFunction>  _compressFunction;
+        private static Action<byte[], int, CopyArrayFunction>       _decompressFunction;
+        private static Action<IntPtr, int, CopyArrayFunction>       _decompressFunctionAlt;
+        private static Func<byte[], int, int>                       _estimateFunction;
+        private static Func<IntPtr, int, int>                       _estimateFunctionAlt;
+
+        /* Defines a C# function which fills a managed array using a pointer and length. */
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void CopyArrayFunction(IntPtr dataPtr, int length);
+
+        /* Static Initializer */
+        static Prs()
+        {
+            if (IntPtr.Size == 4)
+            {
+                _compressFunction = Prs32.Compress;
+                _decompressFunction = Prs32.Decompress;
+                _decompressFunctionAlt = Prs32.Decompress;
+                _estimateFunction = Prs32.Estimate;
+                _estimateFunctionAlt = Prs32.Estimate;
+
+            }
+            else if (IntPtr.Size == 8)
+            {
+                _compressFunction = Prs64.Compress;
+                _decompressFunction = Prs64.Decompress;
+                _decompressFunctionAlt = Prs64.Decompress;
+                _estimateFunction = Prs64.Estimate;
+                _estimateFunctionAlt = Prs64.Estimate;
+            }
+            else
+            {
+                throw new NotSupportedException("Prs compression library is only compiled for X86 and X86_64 architectures.");
+            }
+        }
+
+        /* Legacy Function Redirects */
+
+        public static byte[] Compress(ref byte[] data, int searchBufferSize) => Compress(data, searchBufferSize);
+        public static byte[] Decompress(ref byte[] data) => Decompress(data);
 
         /// <summary>
         /// Compresses a supplied byte array.
@@ -30,10 +66,17 @@ namespace csharp_prs
         /// Increasing this value compresses the data to smaller filesizes at the expense of compression time.
         /// Changing this value has no noticeable effect on decompression time.</param>
         /// <returns></returns>
-        public static byte[] Compress(ref byte[] data, int searchBufferSize)
+        public static byte[] Compress(byte[] data, int searchBufferSize)
         {
-            ByteArray byteArray = _compressor.externCompress(data, data.Length, searchBufferSize);
-            return byteArray.GetBytes();
+            byte[] resultantBytes = new byte[0];
+            void AllocateArrayImpl(IntPtr dataPtr, int length)
+            {
+                resultantBytes = new byte[length];
+                Marshal.Copy(dataPtr, resultantBytes, 0, length);
+            }
+
+            _compressFunction(data, data.Length, searchBufferSize, AllocateArrayImpl);
+            return resultantBytes;
         }
 
         /// <summary>
@@ -42,10 +85,37 @@ namespace csharp_prs
         /// </summary>
         /// <param name="data">The individual PRS compressed data to decompress.</param>
         /// <returns></returns>
-        public static byte[] Decompress(ref byte[] data)
+        public static byte[] Decompress(byte[] data)
         {
-            ByteArray byteArray = _compressor.externDecompress(data, data.Length);
-            return byteArray.GetBytes();
+            byte[] resultantBytes = new byte[0];
+            void AllocateArrayImpl(IntPtr dataPtr, int length)
+            {
+                resultantBytes = new byte[length];
+                Marshal.Copy(dataPtr, resultantBytes, 0, length);
+            }
+
+            _decompressFunction(data, data.Length, AllocateArrayImpl);
+            return resultantBytes;
+        }
+
+        /// <summary>
+        /// Decompresses a supplied array of PRS compressed bytes and
+        /// returns a decompressed copy of said bytes.
+        /// </summary>
+        /// <param name="data">The individual PRS compressed data to decompress.</param>
+        /// <param name="dataLength">The length of the individual PRS compressed data array to decompress.</param>
+        /// <returns></returns>
+        public static unsafe byte[] Decompress(byte* data, int dataLength)
+        {
+            byte[] resultantBytes = new byte[0];
+            void AllocateArrayImpl(IntPtr dataPtr, int length)
+            {
+                resultantBytes = new byte[length];
+                Marshal.Copy(dataPtr, resultantBytes, 0, length);
+            }
+
+            _decompressFunctionAlt((IntPtr)data, dataLength, AllocateArrayImpl);
+            return resultantBytes;
         }
 
         /// <summary>
@@ -54,61 +124,21 @@ namespace csharp_prs
         /// faster than decompressing and may be useful in some situations.
         /// </summary>
         /// <param name="data">The individual PRS compressed data to get the size of after decompression.</param>
-        public static int Estimate(ref byte[] data)
+        public static int Estimate(byte[] data)
         {
-            return _compressor.externEstimate(data, data.Length);
+            return _estimateFunction(data, data.Length);
         }
-
-        static Prs()
-        {
-            if (IntPtr.Size == 4)
-            {
-                _compressor = NativeLibraryBuilder.Default.ActivateInterface<IDlangPrs>(LibraryName32);
-            }
-            else
-            {
-                _compressor = NativeLibraryBuilder.Default.ActivateInterface<IDlangPrs>(LibraryName64);
-            }
-            
-            _compressor.initialize();
-        }
-
 
         /// <summary>
-        /// Simple struct defining a native byte array for interoperability
-        /// with dlang-prs.
+        /// Decodes the PRS compressed stream and returns the size of the PRS compressed
+        /// file, if it were to be decompressed. This operation is approximately 18 times
+        /// faster than decompressing and may be useful in some situations.
         /// </summary>
-        public struct ByteArray
+        /// <param name="data">The individual PRS compressed data to get the size of after decompression.</param>
+        /// <param name="dataLength">The length of the individual PRS compressed data array to decompress.</param>
+        public static unsafe int Estimate(byte* data, int dataLength)
         {
-            public int Length;
-            public IntPtr Pointer;
-
-            /// <summary>
-            /// Creates a "native", C# garbage collected
-            /// byte array and copies the data returned from native code into it.
-            /// </summary>
-            /// <returns></returns>
-            public byte[] GetBytes()
-            {
-                byte[] byteArray = new byte[Length];
-                Marshal.Copy(Pointer, byteArray, 0, Length);
-
-                _compressor.nativeFree(Pointer);
-                return byteArray;
-            }
+            return _estimateFunctionAlt((IntPtr)data, dataLength);
         }
-    }
-
-    /// <summary>
-    /// Represents the exports provided by the D library dlang-prs.
-    /// </summary>
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
-    public interface IDlangPrs
-    {
-        Prs.ByteArray externCompress(byte[] data, int length, int searchBufferSize);
-        Prs.ByteArray externDecompress(byte[] data, int length);
-        int externEstimate(byte[] data, int length);
-        void initialize();
-        void nativeFree(IntPtr memoryPointer);
     }
 }

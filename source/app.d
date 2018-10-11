@@ -13,7 +13,9 @@ import core.thread;
 /*
 	[Visual D]
 	To run me, right click the dlang-prs project in the solution explorer and hit properties, then change output type to Executable.
-	Under Linker category/tab, change the output's extension to .exe
+	Under Linker category/tab, change the output's extension to .exe.
+
+    In addition; remove the "-shared" class from additional commandline arguments.
 */
 void main()
 {

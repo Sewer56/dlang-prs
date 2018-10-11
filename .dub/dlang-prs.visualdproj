@@ -57,7 +57,7 @@
   <program>$(DMDInstallDir)windows\bin\dmd.exe</program>
   <imppath>&quot;..\source&quot;</imppath>
   <fileImppath />
-  <outdir>D:\Users\Desktop\Github\dlang-PRS\build</outdir>
+  <outdir>E:\Users\Desktop\Github\dlang-prs\build</outdir>
   <objdir>obj/debug/dummy/dlang-prs</objdir>
   <objname />
   <libname />
@@ -96,14 +96,14 @@
   <libpaths />
   <deffile />
   <resfile />
-  <exefile>D:\Users\Desktop\Github\dlang-PRS\build\dlang-prs32.dll</exefile>
+  <exefile>E:\Users\Desktop\Github\dlang-prs\build\dlang-prs32.dll</exefile>
   <pdbfile>$(IntDir)\$(SafeProjectName).pdb</pdbfile>
   <impfile>$(IntDir)\$(SafeProjectName).lib</impfile>
   <mapfile>$(IntDir)\$(SafeProjectName).map</mapfile>
   <useStdLibPath>1</useStdLibPath>
   <cRuntime>2</cRuntime>
   <privatePhobos>0</privatePhobos>
-  <additionalOptions />
+  <additionalOptions>-shared</additionalOptions>
   <preBuildCommand />
   <postBuildCommand />
   <filesToClean>*.obj;*.cmd;*.build;*.dep</filesToClean>
@@ -165,7 +165,7 @@
   <program>$(DMDInstallDir)windows\bin\dmd.exe</program>
   <imppath>&quot;..\source&quot;</imppath>
   <fileImppath />
-  <outdir>D:\Users\Desktop\Github\dlang-PRS\build</outdir>
+  <outdir>E:\Users\Desktop\Github\dlang-prs\build</outdir>
   <objdir>obj/debug/dummy/dlang-prs</objdir>
   <objname />
   <libname />
@@ -204,14 +204,14 @@
   <libpaths />
   <deffile />
   <resfile />
-  <exefile>D:\Users\Desktop\Github\dlang-PRS\build\dlang-prs32.dll</exefile>
+  <exefile>E:\Users\Desktop\Github\dlang-prs\build\dlang-prs32.dll</exefile>
   <pdbfile>$(IntDir)\$(SafeProjectName).pdb</pdbfile>
   <impfile>$(IntDir)\$(SafeProjectName).lib</impfile>
   <mapfile>$(IntDir)\$(SafeProjectName).map</mapfile>
   <useStdLibPath>1</useStdLibPath>
   <cRuntime>1</cRuntime>
   <privatePhobos>0</privatePhobos>
-  <additionalOptions />
+  <additionalOptions>-shared</additionalOptions>
   <preBuildCommand />
   <postBuildCommand />
   <filesToClean>*.obj;*.cmd;*.build;*.dep</filesToClean>
@@ -273,7 +273,7 @@
   <program>$(DMDInstallDir)windows\bin\dmd.exe</program>
   <imppath>&quot;..\source&quot;</imppath>
   <fileImppath />
-  <outdir>D:\Users\Desktop\Github\dlang-PRS\build</outdir>
+  <outdir>E:\Users\Desktop\Github\dlang-prs\build</outdir>
   <objdir>obj/debug/dummy/dlang-prs</objdir>
   <objname />
   <libname />
@@ -312,14 +312,14 @@
   <libpaths />
   <deffile />
   <resfile />
-  <exefile>D:\Users\Desktop\Github\dlang-PRS\build\dlang-prs64.dll</exefile>
+  <exefile>E:\Users\Desktop\Github\dlang-prs\build\dlang-prs64.dll</exefile>
   <pdbfile>$(IntDir)\$(SafeProjectName).pdb</pdbfile>
   <impfile>$(IntDir)\$(SafeProjectName).lib</impfile>
   <mapfile>$(IntDir)\$(SafeProjectName).map</mapfile>
   <useStdLibPath>1</useStdLibPath>
   <cRuntime>2</cRuntime>
   <privatePhobos>0</privatePhobos>
-  <additionalOptions />
+  <additionalOptions>-shared</additionalOptions>
   <preBuildCommand />
   <postBuildCommand />
   <filesToClean>*.obj;*.cmd;*.build;*.dep</filesToClean>
@@ -381,7 +381,7 @@
   <program>$(DMDInstallDir)windows\bin\dmd.exe</program>
   <imppath>&quot;..\source&quot;</imppath>
   <fileImppath />
-  <outdir>D:\Users\Desktop\Github\dlang-PRS\build</outdir>
+  <outdir>E:\Users\Desktop\Github\dlang-prs\build</outdir>
   <objdir>obj/debug/dummy/dlang-prs</objdir>
   <objname />
   <libname />
@@ -420,14 +420,14 @@
   <libpaths />
   <deffile />
   <resfile />
-  <exefile>D:\Users\Desktop\Github\dlang-PRS\build\dlang-prs64.dll</exefile>
+  <exefile>E:\Users\Desktop\Github\dlang-prs\build\dlang-prs64.dll</exefile>
   <pdbfile>$(IntDir)\$(SafeProjectName).pdb</pdbfile>
   <impfile>$(IntDir)\$(SafeProjectName).lib</impfile>
   <mapfile>$(IntDir)\$(SafeProjectName).map</mapfile>
   <useStdLibPath>1</useStdLibPath>
   <cRuntime>1</cRuntime>
   <privatePhobos>0</privatePhobos>
-  <additionalOptions />
+  <additionalOptions>-shared</additionalOptions>
   <preBuildCommand />
   <postBuildCommand />
   <filesToClean>*.obj;*.cmd;*.build;*.dep</filesToClean>
@@ -442,6 +442,7 @@
      <File path="..\source\PRS\exports.d" />
     </Folder>
     <File path="..\source\app.d" />
+    <File path="dllmain.d" />
    </Folder>
    <File path="..\dub.json" tool="None" />
   </Folder>
