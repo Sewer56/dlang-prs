@@ -4,7 +4,7 @@ VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{002A2DE9-8BB6-484D-9802-7E4AD4084715}") = "dlang-prs", ".dub\dlang-prs.visualdproj", "{5B0175B6-D62D-4780-9EB2-52E451CF9CE3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "csharp-prs", "csharp-prs\csharp-prs.csproj", "{8F1D9D07-0CBB-4A00-A083-B86DE70FF83A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "csharp-prs", "csharp-prs\csharp-prs.csproj", "{8F1D9D07-0CBB-4A00-A083-B86DE70FF83A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5B0175B6-D62D-4780-9EB2-52E451CF9CE3} = {5B0175B6-D62D-4780-9EB2-52E451CF9CE3}
 	EndProjectSection
@@ -33,8 +33,8 @@ Global
 		{5B0175B6-D62D-4780-9EB2-52E451CF9CE3}.release|x64.Build.0 = release|x64
 		{8F1D9D07-0CBB-4A00-A083-B86DE70FF83A}.debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8F1D9D07-0CBB-4A00-A083-B86DE70FF83A}.debug|Any CPU.Build.0 = Debug|Any CPU
-		{8F1D9D07-0CBB-4A00-A083-B86DE70FF83A}.debug|Win32.ActiveCfg = Debug|Any CPU
-		{8F1D9D07-0CBB-4A00-A083-B86DE70FF83A}.debug|Win32.Build.0 = Debug|Any CPU
+		{8F1D9D07-0CBB-4A00-A083-B86DE70FF83A}.debug|Win32.ActiveCfg = Debug|x86
+		{8F1D9D07-0CBB-4A00-A083-B86DE70FF83A}.debug|Win32.Build.0 = Debug|x86
 		{8F1D9D07-0CBB-4A00-A083-B86DE70FF83A}.debug|x64.ActiveCfg = Debug|Any CPU
 		{8F1D9D07-0CBB-4A00-A083-B86DE70FF83A}.debug|x64.Build.0 = Debug|Any CPU
 		{8F1D9D07-0CBB-4A00-A083-B86DE70FF83A}.release|Any CPU.ActiveCfg = Release|Any CPU
@@ -45,8 +45,8 @@ Global
 		{8F1D9D07-0CBB-4A00-A083-B86DE70FF83A}.release|x64.Build.0 = Release|Any CPU
 		{29196666-227E-495B-BB76-9D1768151E29}.debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{29196666-227E-495B-BB76-9D1768151E29}.debug|Any CPU.Build.0 = Debug|Any CPU
-		{29196666-227E-495B-BB76-9D1768151E29}.debug|Win32.ActiveCfg = Debug|Any CPU
-		{29196666-227E-495B-BB76-9D1768151E29}.debug|Win32.Build.0 = Debug|Any CPU
+		{29196666-227E-495B-BB76-9D1768151E29}.debug|Win32.ActiveCfg = Debug|x86
+		{29196666-227E-495B-BB76-9D1768151E29}.debug|Win32.Build.0 = Debug|x86
 		{29196666-227E-495B-BB76-9D1768151E29}.debug|x64.ActiveCfg = Debug|Any CPU
 		{29196666-227E-495B-BB76-9D1768151E29}.debug|x64.Build.0 = Debug|Any CPU
 		{29196666-227E-495B-BB76-9D1768151E29}.release|Any CPU.ActiveCfg = Release|Any CPU
