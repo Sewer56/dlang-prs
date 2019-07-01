@@ -10,12 +10,14 @@
     <Description>SEGA PRS Fast Compression/Decompression library written in D with a C# frontend.</Description>
     <Authors>Sewer56</Authors>
     <Company />
-    <PackageLicenseUrl>https://github.com/sewer56lol/dlang-prs/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/sewer56lol/dlang-prs</PackageProjectUrl>
     <RepositoryUrl>https://github.com/sewer56lol/dlang-prs</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>2.0.2</Version>
+    <Version>2.0.3</Version>
     <Platforms>AnyCPU;x86</Platforms>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -57,27 +59,17 @@
     <DocumentationFile>..\build\csharp-prs.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="obj\x86\Debug\TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs" />
-    <Compile Remove="obj\x86\Debug\TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs" />
-    <Compile Remove="obj\x86\Debug\TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\build\dlang-prs32.dll" Link="dlang-prs32.dll">
+    <None Include="..\LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="csharp-prs.targets" Pack="true" PackagePath="build">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <Content Include="..\build\dlang-prs32.dll" Link="dlang-prs32.dll" Pack="true" PackagePath="build">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\build\dlang-prs32.exp" Link="dlang-prs32.exp">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\build\dlang-prs32.lib" Link="dlang-prs32.lib">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\build\dlang-prs64.dll" Link="dlang-prs64.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\build\dlang-prs64.exp" Link="dlang-prs64.exp">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\build\dlang-prs64.lib" Link="dlang-prs64.lib">
+    <Content Include="..\build\dlang-prs64.dll" Link="dlang-prs64.dll" Pack="true" PackagePath="build">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -21,6 +21,12 @@ namespace csharp_prs_GUI
         public MainForm()
         {
             InitializeComponent();
+            this.Load += OnLoad;
+        }
+
+        private void OnLoad(object sender, EventArgs e)
+        {
+            PrepareOutputFolder();
         }
 
         /*
@@ -52,7 +58,6 @@ namespace csharp_prs_GUI
         {
             // Get files dropped onto button and process them.
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            PrepareOutputFolder();
 
             int searchBufferSize = (int)nud_SearchBufferSize.Value;
             ParallelOptions options = new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount };
@@ -73,7 +78,6 @@ namespace csharp_prs_GUI
         {
             // Get files dropped onto button and process them.
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            PrepareOutputFolder();
 
             ParallelOptions options = new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount };
             Parallel.ForEach(files, file =>
@@ -95,7 +99,7 @@ namespace csharp_prs_GUI
             ----------------------------
         */
 
-        public void PrepareOutputFolder()
+        private void PrepareOutputFolder()
         {
             if (! Directory.Exists(TempDirectoryName))
                 Directory.CreateDirectory(TempDirectoryName);
@@ -103,11 +107,10 @@ namespace csharp_prs_GUI
                 ClearDirectory(new DirectoryInfo(TempDirectoryName));
         }
 
-
         /// <summary>
         /// Removes all files from a specific directory and subdirectories.
         /// </summary>
-        public static void ClearDirectory(DirectoryInfo directory)
+        private static void ClearDirectory(DirectoryInfo directory)
         {
             foreach (FileInfo file in directory.GetFiles())
                 file.Delete();
