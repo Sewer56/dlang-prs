@@ -297,11 +297,11 @@ public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int search
     {
         for (int currentPointer = pointer - 1; currentPointer >= minimumPointerPosition; currentPointer--)
         {
-            if (source[currentPointer] == source[pointer])
+            if (*cast(short*)(&source[currentPointer]) == *cast(short*)(&source[pointer]))
             {
                 /* We've matched a symbol: Count matching symbols. */
-                currentLength = 1;
-                while ((pointer + currentLength < source.length) && (source[currentPointer + currentLength] == source[pointer + currentLength]))
+                currentLength = 2;
+                while ((source[currentPointer + currentLength] == source[pointer + currentLength]) && (pointer + currentLength < source.length))
                     currentLength++;
                 
                 /* 
@@ -330,10 +330,10 @@ public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int search
         /** Iterate over each individual byte backwards to find the longest match. */
         for (int currentPointer = pointer - 1; currentPointer >= minimumPointerPosition; currentPointer--)
         {
-            if (source[currentPointer] == source[pointer])
+            if (*cast(short*)(&source[currentPointer]) == *cast(short*)(&source[pointer]))
             {
                 /* We've matched a symbol: Count matching symbols. */
-                currentLength = 1;
+                currentLength = 2;
                 while (source[currentPointer + currentLength] == source[pointer + currentLength])
                     currentLength++;
                 
