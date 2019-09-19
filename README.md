@@ -1,6 +1,6 @@
 
 # Changelog
-	19-Sep-2019: Increased compression speed by ~11%.
+	19-Sep-2019: Increased compression speed by up to 50%.
 	25-Aug-2018: Testing methodology changed to not include file write times in compression/decompression. All benchmarks have been retaken.
 	24-Aug-2018: Decompression speed of dlang-prs improved by up to 33%.
 	24-Aug-2018: prs-util [X64] added to benchmarks.
@@ -181,11 +181,14 @@ After finishing this project, I have learned to witness that apparently this als
 
 # Benchmarks
 
-A set of benchmarks is available at [Benchmarks.md](./Benchmarks.md).
+A set of old/legacy benchmarks is available at [Benchmarks.md](./Benchmarks.md).
 
-Please note that the benchmarks are outdated and thus no longer representative of the compressor. Both compression and decompression speed has increased slightly since the taking of these benchmarks.
+Please note that the benchmarks are outdated and no longer representative. Legacy benchmarks are provided because they contain interesting data such as performance scaling across window sizes.
 
-The legacy benchmarks are provided as reference since they are useful.
+Since 19-Sep-2019, there is now a new benchmark project, `csharp-prs-benchmark` :
+
+`csharp-prs-benchmark.Tests.Model` is`s01_P1.bin` in legacy benchmark.
+`csharp-prs-benchmark.Tests.ObjectLayout` is `VECTOR_LOCATOR.DFF` in legacy benchmark.
 
 # The End
 
