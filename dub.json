@@ -8,6 +8,6 @@
 	"license": "GPLV3",
 	"targetName": "dlang-prs",
 	"targetType": "executable",
-	"targetPath": "build\\dlang-prs",
-	"mainSourceFile": "source\\app.d",
+	"targetPath": "./build/dlang-prs",
+	"mainSourceFile": "./source/app.d",
 }

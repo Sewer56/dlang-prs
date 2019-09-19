@@ -311,7 +311,7 @@
   <program>$(DMDInstallDir)windows\bin\dmd.exe</program>
   <imppath>&quot;..\source&quot;</imppath>
   <fileImppath />
-  <outdir>E:\Desktop\Projects\dlang-prs\build\dlang-prs\</outdir>
+  <outdir>./build/dlang-prs/</outdir>
   <objdir>obj/debug/dummy/dlang-prs</objdir>
   <objname />
   <libname />
