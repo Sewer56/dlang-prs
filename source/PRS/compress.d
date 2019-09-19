@@ -24,6 +24,7 @@ module prs.compress;
 import std.math; 
 import std.typecons;
 import std.container.array;
+import std.algorithm;
 
 /*	
 	---------------------
@@ -37,6 +38,10 @@ import std.container.array;
 	This value is inclusive, i.e. maxLength + 1 is the first disallowed value. 
 */
 public const int maxLength = 0x100;
+
+public const int shortCopyMaxLength = 0x100;
+public const int shortCopyMaxOffset = 5;
+public const int shortCopyMinOffset = 2;
 
 /** 
 	Defines the size of the sliding window to be used as part of LZ77
@@ -140,14 +145,23 @@ public byte[] compress(ref byte[] source, int searchBufferSize = 0x1FFF)
 		LZ77Properties lz77Match = lz77GetLongestMatch(source, pointer, searchBufferSize, maxLength);
 
 		// Pack into the archive as direct byte if there is no match.
-		if (lz77Match.length <= 2)
+        if (lz77Match.offset >= -shortCopyMaxLength && lz77Match.length >= shortCopyMinOffset && lz77Match.length <= shortCopyMaxOffset)
+        {
+            pointer += lz77Match.length;
+            writeShortCopy(destination, lz77Match); // CompressionType.ShortCopy
+        }
+		else if (lz77Match.length <= 2)
 		{
 			writeDirectByte(destination, source[pointer]);
 		}
 		else
 		{
-			// Decide the way to encode the current stream.
-			encodeLZ77Match(destination, lz77Match);
+            // Encode LZ77 Match
+            pointer += lz77Match.length;
+            if (lz77Match.length >= 3 && lz77Match.length <= 9)
+                writeLongCopySmall(destination, lz77Match); // CompressionType.LongCopySmall
+            else
+                writeLongCopyLarge(destination, lz77Match); // CompressionType.LongCopyLarge	
 		}
 	}
 
@@ -159,33 +173,6 @@ public byte[] compress(ref byte[] source, int searchBufferSize = 0x1FFF)
 
 	// Return back
 	return (&destination[0])[0 .. destination.length].dup;
-}
-
-/**
-	Retrieves the mode of compression that a given lz77 match
-	should be encoded in within the PRS format.
-
-	Params:
-		lz77Match stores the individual details of a lz77 
-*/
-pragma(inline, true)
-public void encodeLZ77Match(ref Array!byte destinationArray, ref LZ77Properties lz77Match)
-{
-	// The match length will be modified before it will be written to save on lines, let us increment the file pointer now instead.
-	pointer += lz77Match.length;
-
-	if (lz77Match.offset >= -256 && lz77Match.length <= 5)
-	{
-		writeShortCopy(destinationArray, lz77Match); // CompressionType.ShortCopy
-	}
-	else
-	{
-		if (lz77Match.length >= 3 && lz77Match.length <= 9)
-			writeLongCopySmall(destinationArray, lz77Match); // CompressionType.LongCopySmall
-		else
-			writeLongCopyLarge(destinationArray, lz77Match); // CompressionType.LongCopyLarge			
-	}
-
 }
 
 /** 
@@ -276,14 +263,6 @@ public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int search
 	/** Stores the details of the best found LZ77 match up till a point. */
 	LZ77Properties bestLZ77Match    = LZ77Properties(0,0);
 
-	/** ---------------------------
-		Properties of the for loop.
-		---------------------------
-
-		Simplifies the loop itself and prevents unnecessary 
-		calculations on every step of the loop.
-	*/  
-
 	/** The length of the current match of symbols. */
 	int currentLength = 0;
 
@@ -327,7 +306,7 @@ public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int search
     }
     else 
     {
-        int initialMatch = (*cast(int*)(&source[pointer]) & 0x00FFFFFF);
+        int initialMatch = (*cast(int*)(&source[pointer])) & 0x00FFFFFF;
 
         /** Iterate over each individual byte backwards to find the longest match. */
         for (int currentPointer = pointer - 1; currentPointer >= minimumPointerPosition; currentPointer--)
@@ -356,6 +335,27 @@ public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int search
                 {
                     bestLZ77Match.length = currentLength;
                     bestLZ77Match.offset = currentPointer - pointer;
+                }
+            }
+        }
+
+        /* If no match found, check for possible missed short copy (2-5 bytes). */
+        if (bestLZ77Match.length == 0) 
+        {
+            short shortInitialMatch = (*cast(short*)(&source[pointer]));
+            minimumPointerPosition  = pointer - min(searchBufferSize, shortCopyMaxLength);
+            if (minimumPointerPosition < 0)
+                minimumPointerPosition = 0;
+
+            for (int currentPointer = pointer - 1; currentPointer >= minimumPointerPosition; currentPointer--)
+            {
+                if ((*cast(short*)(&source[currentPointer])) == shortInitialMatch)
+                {
+                    /* We've matched a symbol: Count matching symbols. */
+                    currentLength = 2;
+                    bestLZ77Match.length = currentLength;
+                    bestLZ77Match.offset = currentPointer - pointer;
+                    break;
                 }
             }
         }

@@ -1,5 +1,6 @@
 
 # Changelog
+	19-Sep-2019: Performance tweak adjusted. Compressor now produces optimally compressed files. Files are now same size as original game files.
 	19-Sep-2019: Increased compression speed by up to 50%.
 	25-Aug-2018: Testing methodology changed to not include file write times in compression/decompression. All benchmarks have been retaken.
 	24-Aug-2018: Decompression speed of dlang-prs improved by up to 33%.
