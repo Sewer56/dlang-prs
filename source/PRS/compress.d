@@ -176,19 +176,14 @@ public void encodeLZ77Match(ref Array!byte destinationArray, ref LZ77Properties 
 
 	if (lz77Match.offset >= -256 && lz77Match.length <= 5)
 	{
-		// CompressionType.ShortCopy
-		writeShortCopy(destinationArray, lz77Match);
+		writeShortCopy(destinationArray, lz77Match); // CompressionType.ShortCopy
 	}
 	else
 	{
 		if (lz77Match.length >= 3 && lz77Match.length <= 9)
-
-			// CompressionType.LongCopySmall
-			writeLongCopySmall(destinationArray, lz77Match);
-
+			writeLongCopySmall(destinationArray, lz77Match); // CompressionType.LongCopySmall
 		else
-			// CompressionType.LongCopyLarge
-			writeLongCopyLarge(destinationArray, lz77Match);			
+			writeLongCopyLarge(destinationArray, lz77Match); // CompressionType.LongCopyLarge			
 	}
 
 }
@@ -272,7 +267,7 @@ public void writeLongCopyLarge(ref Array!byte destinationArray, ref LZ77Properti
 		maxLength = The maximum number of bytes to match in a found pattern searching backwards. This number is inclusive, i.e. includes the passed value.
 	
 */
-public LZ77Properties lz77GetLongestMatch(ref byte[] source, int pointer, int searchBufferSize, int maxLength)
+public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int searchBufferSize, int maxLength)
 {
 	/*	The source bytes are a reference in order to prevent copying. 
 		The other parameters are value type in order to take advantage of locality of reference.
@@ -289,9 +284,6 @@ public LZ77Properties lz77GetLongestMatch(ref byte[] source, int pointer, int se
 		calculations on every step of the loop.
 	*/  
 
-	/** The pointer inside the search buffer at which to start searching repeating bytes for. */
-	int currentPointer = pointer - 1;
-
 	/** The length of the current match of symbols. */
 	int currentLength = 0;
 
@@ -300,42 +292,76 @@ public LZ77Properties lz77GetLongestMatch(ref byte[] source, int pointer, int se
 	if (minimumPointerPosition < 0)
 		minimumPointerPosition = 0;
 
-	/** Iterate over each individual byte backwards to find the longest match. */
-	for (; currentPointer >= minimumPointerPosition; currentPointer--)
-	{
-		if (source[currentPointer] == source[pointer])
-		{
-			// We've matched a symbol.
-			currentLength = 1;
-			
-			/* Check for matches. */
-			while ((pointer + currentLength < source.length) && (source[currentPointer + currentLength] == source[pointer + currentLength]))
-			{
-				currentLength++;
-			}
+    void pingas() {
 
-			/* 
-				Cap at the limit of repeated bytes if it's over the limit of what PRS allows.
-				We can also stop our search here.
-			*/
-			if (currentLength > maxLength)
-			{
-				currentLength = maxLength;
-				bestLZ77Match.length = currentLength;
-				bestLZ77Match.offset = currentPointer - pointer;
-				break;
-			}
+    }
 
-			/* 
-				Set the best match if acquired.
-			*/
-			if (currentLength > bestLZ77Match.length)
-			{
-				bestLZ77Match.length = currentLength;
-				bestLZ77Match.offset = currentPointer - pointer;
-			}
-		}
-	}
+    /** Speedup: If cannot exceed source length, do not check it on every loop iteration. */
+    if (pointer + maxOffset > source.length) 
+    {
+        for (int currentPointer = pointer - 1; currentPointer >= minimumPointerPosition; currentPointer--)
+        {
+            if (source[currentPointer] == source[pointer])
+            {
+                /* We've matched a symbol: Count matching symbols. */
+                currentLength = 1;
+                while ((pointer + currentLength < source.length) && (source[currentPointer + currentLength] == source[pointer + currentLength]))
+                    currentLength++;
+                
+                /* 
+                    Cap at the limit of repeated bytes if it's over the limit of what PRS allows.
+                    We can also stop our search here.
+                */
+                if (currentLength > maxLength)
+                {
+                    currentLength = maxLength;
+                    bestLZ77Match.length = currentLength;
+                    bestLZ77Match.offset = currentPointer - pointer;
+                    break;
+                }
+
+                /* Set the best match if acquired. */
+                if (currentLength > bestLZ77Match.length)
+                {
+                    bestLZ77Match.length = currentLength;
+                    bestLZ77Match.offset = currentPointer - pointer;
+                }
+            }
+        }
+    }
+    else 
+    {
+        /** Iterate over each individual byte backwards to find the longest match. */
+        for (int currentPointer = pointer - 1; currentPointer >= minimumPointerPosition; currentPointer--)
+        {
+            if (source[currentPointer] == source[pointer])
+            {
+                /* We've matched a symbol: Count matching symbols. */
+                currentLength = 1;
+                while (source[currentPointer + currentLength] == source[pointer + currentLength])
+                    currentLength++;
+                
+                /* 
+				    Cap at the limit of repeated bytes if it's over the limit of what PRS allows.
+				    We can also stop our search here.
+                */
+                if (currentLength > maxLength)
+                {
+                    currentLength = maxLength;
+                    bestLZ77Match.length = currentLength;
+                    bestLZ77Match.offset = currentPointer - pointer;
+                    break;
+                }
+
+                /*  Set the best match if acquired. */
+                if (currentLength > bestLZ77Match.length)
+                {
+                    bestLZ77Match.length = currentLength;
+                    bestLZ77Match.offset = currentPointer - pointer;
+                }
+            }
+        }
+    }
 
 	return bestLZ77Match;
 }
