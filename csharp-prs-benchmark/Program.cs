@@ -11,6 +11,19 @@ namespace csharp_prs_benchmark
         {
             BenchmarkRunner.Run<Model>();
             BenchmarkRunner.Run<ObjectLayout>();
-        } 
+
+            var files = new FileBenchmark[] { new Model(), new ObjectLayout() };
+            foreach (var file in files)
+                PrintCompressedSizes(file);
+        }
+
+        private static void PrintCompressedSizes(FileBenchmark benchmark)
+        {
+            foreach (var size in benchmark.WindowSizes)
+            {
+                byte[] compressed = benchmark.Compress(size);
+                Console.WriteLine($"Benchmark: {benchmark} | Compressed Size: {compressed.Length} | Window Size: {size}");
+            }
+        }
     }
 }
