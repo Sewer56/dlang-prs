@@ -1,70 +1,34 @@
 module app;
 
-import std.stdio;
-import std.conv;
-import std.file;
-import prs.compress;
-import prs.decompress;
-import prs.estimate;
-import std.datetime.stopwatch;
-import std.container.array;
-import core.thread;
+import core.sys.windows.windows;
+import core.sys.windows.dll;
 
-/*
-	[Visual D]
-	To run me, right click the dlang-prs project in the solution explorer and hit properties, then change output type to Executable.
-	Under Linker category/tab, change the output's extension to .exe.
+__gshared HINSTANCE g_hInst;
 
-    In addition; remove the "-shared" class from additional commandline arguments.
-*/
-void main()
+// https://wiki.dlang.org/Win32_DLLs_in_D
+extern (Windows)
+BOOL DllMain(HINSTANCE hInstance, ULONG ulReason, LPVOID pvReserved)
 {
-	// Whoohoo!
-	writeln("Benchmark Start!");
-    
-    Thread.sleep(dur!("msecs")( 1000 ));
+    switch (ulReason)
+    {
+        case DLL_PROCESS_ATTACH:
+            g_hInst = hInstance;
+            dll_process_attach( hInstance, true );
+            break;
 
-	// Read
-	byte[] original = cast(byte[])read("compressme.bin");
-    byte[] prsFile;
+        case DLL_PROCESS_DETACH:
+            dll_process_detach( hInstance, true );
+            break;
 
-	// Compress
-	void compbench() 
-	{ 
-		// 1/4 search buffer size, use 1FFF for benchmarking against other implementations.
-		prsFile = compress(original, 0x1FFF); 
-	}
+        case DLL_THREAD_ATTACH:
+            dll_thread_attach( true, true );
+            break;
 
-	// Benchmark
-	auto compDurations = benchmark!(compbench)(1);
-	writeln("Compress: " ~ compDurations[0].toString());
-    std.file.write("compressed.prs", (&prsFile[0])[0 .. prsFile.length]);
+        case DLL_THREAD_DETACH:
+            dll_thread_detach( true, true );
+            break;
 
-	// Read
-	byte[] compressed = cast(byte[])read("decompressme.prs");
-    byte[] decompressed;
-
-	// Decompress
-	void decompbench() 
-	{ 
-		decompressed = decompress(compressed); 
-	}
-
-    // Benchmark
-    auto decompDurations = benchmark!(decompbench)(1);
-	writeln("Decompress: " ~ decompDurations[0].toString());
-    std.file.write("decompressed.bin", decompressed);
-    
-    // Estimate
-	int estimatebench() 
-	{ 
-		return estimate(compressed);
-	}
-
-    // Benchmark
-    auto estimateDurations = benchmark!(estimatebench)(1);
-	writeln("Estimate: " ~ estimateDurations[0].toString());
-
-	// Hang (testing)
-	readln();
+        default:
+    }
+    return true;
 }
