@@ -292,10 +292,6 @@ public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int search
 	if (minimumPointerPosition < 0)
 		minimumPointerPosition = 0;
 
-    void pingas() {
-
-    }
-
     /** Speedup: If cannot exceed source length, do not check it on every loop iteration. */
     if (pointer + maxOffset > source.length) 
     {
