@@ -271,8 +271,8 @@ public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int search
 	if (minimumPointerPosition < 0)
 		minimumPointerPosition = 0;
 
-    /** Speedup: If cannot exceed source length, do not check it on every loop iteration. */
-    if (pointer + maxOffset + int.sizeof > source.length) 
+    /** Speedup: If cannot exceed source length, do not check it on every loop iteration. (else clause) */
+    if (pointer + maxLength + int.sizeof >=	source.length) // length is 1 indexed, our reads are not.
     {
         for (int currentPointer = pointer - 1; currentPointer >= minimumPointerPosition; currentPointer--)
         {
@@ -280,7 +280,7 @@ public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int search
             {
                 /* We've matched a symbol: Count matching symbols. */
                 currentLength = 1;
-                while ((source[currentPointer + currentLength] == source[pointer + currentLength]) && (pointer + currentLength < source.length))
+                while ((pointer + currentLength < source.length) && (source[currentPointer + currentLength] == source[pointer + currentLength]))
                     currentLength++;
                 
                 /* 
@@ -292,7 +292,7 @@ public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int search
                     currentLength = maxLength;
                     bestLZ77Match.length = currentLength;
                     bestLZ77Match.offset = currentPointer - pointer;
-                    break;
+                    goto foundMaxLengthMatch;
                 }
 
                 /* Set the best match if acquired. */
@@ -316,18 +316,20 @@ public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int search
                 /* We've matched a symbol: Count matching symbols. */
                 currentLength = 3;
                 while (source[currentPointer + currentLength] == source[pointer + currentLength])
-                    currentLength++;
-                
-                /* 
-				    Cap at the limit of repeated bytes if it's over the limit of what PRS allows.
-				    We can also stop our search here.
-                */
-                if (currentLength > maxLength)
                 {
-                    currentLength = maxLength;
-                    bestLZ77Match.length = currentLength;
-                    bestLZ77Match.offset = currentPointer - pointer;
-                    break;
+                    currentLength++;
+
+                    /* 
+						This check needs to be here, otherwise the search might go into unitialized memory as 
+                        the loop will not cap before maxLength
+                    */
+                    if (currentLength > maxLength)
+                    {
+                        currentLength = maxLength;
+                        bestLZ77Match.length = currentLength;
+                        bestLZ77Match.offset = currentPointer - pointer;
+                        goto foundMaxLengthMatch;
+                    }
                 }
 
                 /*  Set the best match if acquired. */
@@ -361,6 +363,8 @@ public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int search
         }
     }
 
+
+	foundMaxLengthMatch:
 	return bestLZ77Match;
 }
 
