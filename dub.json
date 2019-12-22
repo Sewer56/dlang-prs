@@ -8,6 +8,6 @@
 	"license": "GPLV3",
 	"targetName": "dlang-prs",
 	"targetType": "dynamicLibrary",
-	"targetPath": "./build/dlang-prs",
+	"targetPath": "./build/",
 	"mainSourceFile": "./source/app.d",
 }
