@@ -17,26 +17,26 @@
 
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <https://www.gnu.org/licenses/>
-*/
+ */
 
 module prs.compress;
 
+import std.algorithm;
+import std.container.array;
 import std.math; 
 import std.typecons;
-import std.container.array;
-import std.algorithm;
 
 /*	
 	---------------------
 	Constants & Variables
 	---------------------
-*/ 
+ */ 
 
 /** 
 	Defines the maximum allowed length of matching/equivalent sequential bytes in a found pattern
 	within the search buffer as part of the LZ77 compression algorithm PRS bases on.
 	This value is inclusive, i.e. maxLength + 1 is the first disallowed value. 
-*/
+ */
 public const int maxLength = 0x100;
 
 public const int shortCopyMaxLength = 0x100;
@@ -48,61 +48,61 @@ public const int shortCopyMinOffset = 2;
 	offset and size based compression.
     The value listed here is the actual limit supported by the compression format.
 	It may be overwritten by the parameter of the compress function.
-*/
+ */
 public int maxOffset = 0x1FFF;
 
 /**
 	Defines the index of the next control bit of the active control byte that is
 	to be modified by the compressor in question.	
-*/
+ */
 private int currentBitPosition = 0;
 
 /**
 	Stores the current instance of the control byte which will have various variable length
 	codes appended to it in order to instruct the decoder what to do next.
-*/
+ */
 private byte* controlByte;
 
 /**
 	Specifies the current offset from the start of the file used during compression.
-*/
+ */
 private int pointer = 0;
 
 /*	
 	------------------------
 	Structs, Classes & Enums
 	------------------------
-*/ 
+ */ 
 
 /** 
 	Specifies the individual PRS modes of compression (opcodes) that
 	may be used to encode the individual found LZ77 dictionary match.
-*/
+ */
 public enum CompressionType
 {
 	/** 
 		The length of the copy if 2-5 inclusive and the maximum
 		offset is 255 bytes.
 	*/
-	ShortCopy,
+	shortCopy,
 
 	/**
 		An offset (up to 0x1FFF) and size (3-9 inclusive) combination is written directly as 2 bytes
 		to the array/file/stream with the offset taking 13 bits and size 3 bits. 
 	*/
-	LongCopySmall,
+	longCopySmall,
 
 	/**
-		The same as LongCopySmall except that the size is stored in another byte inside the controlByte-data
+		The same as longCopySmall except that the size is stored in another byte inside the controlByte-data
 		block and is in the range 1-256
 	*/
-	LongCopyLarge
+	longCopyLarge
 }
 
 /** 
 	Defines a quick structure in the form of a tuple which
 	declares the properties common to LZ77 compression algorithms.
-*/
+ */
 alias LZ77Properties = Tuple!(int, "offset", int, "length");
 
 /**
@@ -110,15 +110,14 @@ alias LZ77Properties = Tuple!(int, "offset", int, "length");
 	Returns the compressed version of the byte array.
 
 	Params:
-		source =				The byte array containing the file or data to compress.
+		source = The byte array containing the file or data to compress.
 
-		searchBufferSize =		(Default: 0x1FFF)
-								A value preferably between 0xFF and 0x1FFF that declares how many bytes
-								the compressor visit before any specific byte to search for matching patterns.
-								Increasing this value compresses the data to smaller filesizes at the expense of compression time.
-								Changing this value has no noticeable effect on decompression time.
-						   
-*/
+		searchBufferSize = (Default: 0x1FFF)
+		                   A value preferably between 0xFF and 0x1FFF that declares how many bytes
+		                   the compressor visit before any specific byte to search for matching patterns.
+		                   Increasing this value compresses the data to smaller filesizes at the expense of compression time.
+		                   Changing this value has no noticeable effect on decompression time.
+ */
 public byte[] compress(ref byte[] source, int searchBufferSize = 0x1FFF)
 {
 	// Assume our compressed file will be at least of equivalent length.
@@ -148,7 +147,7 @@ public byte[] compress(ref byte[] source, int searchBufferSize = 0x1FFF)
         if (lz77Match.offset >= -shortCopyMaxLength && lz77Match.length >= shortCopyMinOffset && lz77Match.length <= shortCopyMaxOffset)
         {
             pointer += lz77Match.length;
-            writeShortCopy(destination, lz77Match); // CompressionType.ShortCopy
+            writeShortCopy(destination, lz77Match); // CompressionType.shortCopy
         }
 		else if (lz77Match.length <= 2)
 		{
@@ -159,9 +158,9 @@ public byte[] compress(ref byte[] source, int searchBufferSize = 0x1FFF)
             // Encode LZ77 Match
             pointer += lz77Match.length;
             if (lz77Match.length >= 3 && lz77Match.length <= 9)
-                writeLongCopySmall(destination, lz77Match); // CompressionType.LongCopySmall
+                writeLongCopySmall(destination, lz77Match); // CompressionType.longCopySmall
             else
-                writeLongCopyLarge(destination, lz77Match); // CompressionType.LongCopyLarge	
+                writeLongCopyLarge(destination, lz77Match); // CompressionType.longCopyLarge	
 		}
 	}
 
@@ -178,7 +177,7 @@ public byte[] compress(ref byte[] source, int searchBufferSize = 0x1FFF)
 /** 
 	Writes the direct byte opcode onto the control byte of the PRS
 	compression buffer and its corresponding direct byte.
-*/
+ */
 pragma(inline, true)
 public void writeDirectByte(ref Array!byte destinationArray, byte byteToWrite)
 {
@@ -253,7 +252,7 @@ public void writeLongCopyLarge(ref Array!byte destinationArray, ref LZ77Properti
 		searchBufferSize = The amount of bytes to search backwards in order to find the matching pattern.
 		maxLength = The maximum number of bytes to match in a found pattern searching backwards. This number is inclusive, i.e. includes the passed value.
 	
-*/
+ */
 public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int searchBufferSize, int maxLength)
 {
 	/*	The source bytes are a reference in order to prevent copying. 
@@ -261,7 +260,7 @@ public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int search
 	*/
 	
 	/** Stores the details of the best found LZ77 match up till a point. */
-	LZ77Properties bestLZ77Match    = LZ77Properties(0,0);
+	LZ77Properties bestLZ77Match = LZ77Properties(0,0);
 
 	/** The length of the current match of symbols. */
 	int currentLength = 0;
@@ -272,7 +271,7 @@ public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int search
 		minimumPointerPosition = 0;
 
     /** Speedup: If cannot exceed source length, do not check it on every loop iteration. (else clause) */
-    if (pointer + maxLength + int.sizeof >=	source.length) // length is 1 indexed, our reads are not.
+    if (pointer + maxLength + int.sizeof >= source.length) // length is 1 indexed, our reads are not.
     {
         for (int currentPointer = pointer - 1; currentPointer >= minimumPointerPosition; currentPointer--)
         {
@@ -345,7 +344,7 @@ public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int search
         if (bestLZ77Match.length == 0) 
         {
             short shortInitialMatch = (*cast(short*)(&source[pointer]));
-            minimumPointerPosition  = pointer - min(searchBufferSize, shortCopyMaxLength);
+            minimumPointerPosition = pointer - min(searchBufferSize, shortCopyMaxLength);
             if (minimumPointerPosition < 0)
                 minimumPointerPosition = 0;
 
@@ -373,10 +372,10 @@ public LZ77Properties lz77GetLongestMatch(byte[] source, int pointer, int search
 	then increments the current bit position denoted by variable currentBitPosition.
 
 	Params:
-		bit				 =	The either 0 or 1 bit to be appended onto the control byte.
-		destinationArray =	The array from which the individual control byte is sourced.
-							Used for assigning the new control byte when necessary.
-*/
+		bit              = The either 0 or 1 bit to be appended onto the control byte.
+		destinationArray = The array from which the individual control byte is sourced.
+		                   Used for assigning the new control byte when necessary.
+ */
 public void appendControlBit(int bit, ref Array!byte destinationArray)
 {
 	/*
@@ -391,7 +390,7 @@ public void appendControlBit(int bit, ref Array!byte destinationArray)
 		in the same block as long as the order or writing the opcodes before their
 		data block counterparts (which makes the source code cleaner and easier to 
 		understand anyway) is enforced.
-	*/
+	 */
 	if (currentBitPosition >= 8)                                      
 	{
 		// Setup next control byte.

@@ -215,3 +215,9 @@ FakesAssemblies/
 **/*.Server/GeneratedArtifacts
 **/*.Server/ModelManifest.xml
 _Pvt_Extensions
+
+# dub build folder
+.dub/
+
+# dub generated Visual D solution
+dlang-prs.sln

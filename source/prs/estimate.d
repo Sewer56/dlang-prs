@@ -17,7 +17,7 @@
 
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <https://www.gnu.org/licenses/>
-*/
+ */
 
 module prs.estimate;
 import std.container.array;
@@ -26,18 +26,18 @@ import std.typecons;
 /**
     Stores the current instance of the control byte which will have various variable length
     codes appended to it in order to instruct the decoder what to do next.
-*/
+ */
 private byte controlByte;
 
 /**
     Defines the index of the next control bit of the active control byte that is
     to be modified by the compressor in question.	
-*/
+ */
 private int currentBitPosition = 0;
 
 /**
     Specifies the current offset from the start of the file used during decompression.
-*/
+ */
 private int pointer = 0;
 
 /**
@@ -48,7 +48,7 @@ private int pointer = 0;
 
     Params:
     source = An array of bytes read containing a PRS compressed file or structure.
-*/
+ */
 public int estimate(ref byte[] source)
 {
 	// Initialize variables.
@@ -77,8 +77,7 @@ public int estimate(ref byte[] source)
 			if (decodeLongCopy(source, fileSize))
 				break;
 		}
-		// Do Opcode 00
-		else
+		else // Do Opcode 00
 		{
 			decodeShortCopy(source, fileSize);
 		}
@@ -98,23 +97,25 @@ public int estimate(ref byte[] source)
     Params:
     source = Source array to PRS shortcopy from.
     destination = Destination array to perform the copy operation to.
-*/
+ */
 public bool decodeLongCopy(ref byte[] source, ref int fileSize)
 {
 	// Obtain the offset and size packed combination.
-	int offset	=	readByte(source);		// Dlang will return negative number, e.g. ff ff ff 88 when only 88 is read because of signed bytes being default.
-	                                        // Readbyte has been modified to return unsigned only
-	offset		|=	readByte(source) << 8;	   
+	int offset = readByte(source); // Dlang will return negative number, e.g. ff ff ff 88 when only 88 is read because of signed bytes being default.
+	                               // Readbyte has been modified to return unsigned only
+	offset |= readByte(source) << 8;	   
 
 	// Check for decompression end condition.
 	if (offset == 0)
-	{ return true; }
+	{
+		return true;
+	}
 
 	// Separate the size from the offset and calculate the actual offset.
 	int length = offset & 0b111;
-	offset = (offset >> 3) | -0x2000;	// When packing, we have lost the contents of the initial bits when left shifting which make
-	                                    // our offset negative (8192 - offset = actual offset)
-	                                    // Here we simply re-add those bits back to get our actual offset.
+	offset = (offset >> 3) | -0x2000; // When packing, we have lost the contents of the initial bits when left shifting which make
+	                                  // our offset negative (8192 - offset = actual offset)
+	                                  // Here we simply re-add those bits back to get our actual offset.
 
 	// Check if Mode 3 (Long Copy Large)
 	if (length == 0)
@@ -123,8 +124,10 @@ public bool decodeLongCopy(ref byte[] source, ref int fileSize)
 		length = readByte(source); 
 		length += 1;
 	} 
-	else							   // Otherwise Mode 2 (Long Copy Short)
-	{ length += 2; }				   // Offset length by 2 a packed.
+	else // Otherwise Mode 2 (Long Copy Short)
+	{
+		length += 2; // Offset length by 2 a packed.
+	}
 
 	// LZ77 Write to Destination
     fileSize += length;
@@ -138,16 +141,16 @@ public bool decodeLongCopy(ref byte[] source, ref int fileSize)
     Params:
     source = Source array to PRS shortcopy from.
     destination = Destination array to perform the copy operation to.
-*/
+ */
 public void decodeShortCopy(ref byte[] source, ref int fileSize)
 {
 	// Use a shorter variable name for simplification. (Compiler will optimize this out in release mode)
 	int length = 0;
 
 	// Get our length for the jump.
-	length =  length		| retrieveControlBit(source); // The second bit comes first.
-	length =  length << 1;								  // Small hint to the compiler.
-	length =  length		| retrieveControlBit(source); // Then the first bit.
+	length = length | retrieveControlBit(source); // The second bit comes first.
+	length = length << 1;                         // Small hint to the compiler.
+	length = length | retrieveControlBit(source); // Then the first bit.
 
 	// Offset the value back by 2.
 	length += 2;
@@ -163,7 +166,7 @@ public void decodeShortCopy(ref byte[] source, ref int fileSize)
 /**
     Reads a byte from the location specified by the module local
     variable pointer and automatically increments the pointer value.
-*/
+ */
 public ubyte readByte(ref byte[] source)
 {
 	ubyte returnValue = source[pointer];
@@ -175,7 +178,7 @@ public ubyte readByte(ref byte[] source)
     Retrieves the next control bit inside of the currently
     set controlByte. Fetches the next controlByte and reads
     the first bit if the current controlByte is exhausted.
-*/
+ */
 public int retrieveControlBit(ref byte[] source)
 {
 	// Once we are exhausted out of bits, we need to read the next one from our stream.
