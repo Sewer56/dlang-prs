@@ -210,6 +210,6 @@ Since 19-Sep-2019, there is now a new benchmark project, `csharp-prs-benchmark` 
 Note: Successful builds output in `build` directory. where the solution files reside 
 
 ### All C# Components (Wrapper, GUI Util.)
-- Install the latest .NET Core 2.X SDK.
-- Compile `dlang-prs` (see above) for Win32 (x86) and x64.
+- Install the latest .NET Core SDK.
+- Run the PowerShell build script for D components, `Build.ps1`; this will compile the library for x86 and x64.
 - Open `csharp.sln` in Visual Studio and build.
