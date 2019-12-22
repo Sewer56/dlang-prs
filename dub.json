@@ -10,4 +10,5 @@
 	"targetType": "dynamicLibrary",
 	"targetPath": "./build/",
 	"mainSourceFile": "./source/app.d",
+	"dflags": [ "-boundscheck=off" ]
 }
