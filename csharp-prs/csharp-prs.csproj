@@ -14,7 +14,7 @@
     <PackageProjectUrl>https://github.com/sewer56lol/dlang-prs</PackageProjectUrl>
     <RepositoryUrl>https://github.com/sewer56lol/dlang-prs</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>2.1.2</Version>
+    <Version>2.1.3</Version>
     <Platforms>AnyCPU;x86</Platforms>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -33,5 +33,8 @@
     <Content Include="..\build\dlang-prs64.dll" Pack="true" PackagePath="build">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\csharp-prs-interfaces\csharp-prs-interfaces.csproj" />
   </ItemGroup>
 </Project>
