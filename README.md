@@ -204,7 +204,7 @@ Since 19-Sep-2019, there is now a new benchmark project, `csharp-prs-benchmark` 
 - Install the latest version of Visual D: https://github.com/dlang/visuald/releases with the LDC compiler  (e.g. [VisualD-v0.51.0-beta1-dmd-2.089.0-ldc2-1.18.0.exe](https://github.com/dlang/visuald/releases/download/v0.51.0-beta1/VisualD-v0.51.0-beta1-dmd-2.089.0-ldc2-1.18.0.exe))
 - Add the DMD and LDC compilers to your System Environment Variables' PATH (in case they are not added).
 ![Adding to PATH](https://i.imgur.com/lrMoasL.png)
-- Generate the Visual Studio solution by using the `dub` package manager (available in your PATH if set correctly). `dub generate visuald -b release`
+- Generate the Visual Studio solution by using the `dub` package manager (available in your PATH if set correctly). `dub generate visuald -b release-nobounds`
 - Open `dlang-prs.sln` in Visual Studio.
 
 Note: Successful builds output in `build` directory. where the solution files reside 

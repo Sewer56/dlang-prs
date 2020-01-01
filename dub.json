@@ -4,11 +4,14 @@
 		"Sewer56"
 	],
 	"description": "A port of basic PRS compressor + decompressor written to the D language.",
-	"copyright": "Copyright © 2018, Sewer56",
+	"copyright": "Copyright © 2019, Sewer56",
 	"license": "GPLV3",
 	"targetName": "dlang-prs",
 	"targetType": "dynamicLibrary",
 	"targetPath": "./build/",
-	"mainSourceFile": "./source/app.d",
-	"dflags": [ "-boundscheck=off" ]
+	"buildTypes": {
+		"release-nobounds": {
+			"buildOptions": ["releaseMode", "optimize", "inline", "noBoundsCheck"],
+		}
+	},
 }
