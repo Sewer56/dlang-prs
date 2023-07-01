@@ -61,13 +61,30 @@ namespace csharp_prs_GUI
 
             int searchBufferSize = (int)nud_SearchBufferSize.Value;
             ParallelOptions options = new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount };
-            Parallel.ForEach(files, file =>
+            Parallel.ForEach(files, options, file =>
             {
-                byte[] decompressedFile = File.ReadAllBytes(file);
-                byte[] compressedFile = Prs.Compress(ref decompressedFile, searchBufferSize);
+                if (Directory.Exists(file))
+                {
+                    // If Directory, Do All Relative Files.
+                    var directoryName = Path.GetFileName(file);
+                    var filesInDirectory = Directory.GetFiles(file, "*.*", SearchOption.AllDirectories);
+                    foreach (var fileInDirectory in filesInDirectory)
+                    {
+                        var relativePath    = Paths.GetRelativePath(fileInDirectory, file);
+                        var destinationPath = Paths.AppendRelativePath(relativePath, $"{TempDirectoryName}/{directoryName}");
+                        Directory.CreateDirectory(Path.GetDirectoryName(destinationPath));
+                        File.WriteAllBytes(destinationPath, Prs.Compress(File.ReadAllBytes(fileInDirectory), searchBufferSize));
+                    }
+                }
+                else
+                {
+                    // Else compress just the file.
+                    byte[] decompressedFile = File.ReadAllBytes(file);
+                    byte[] compressedFile = Prs.Compress(ref decompressedFile, searchBufferSize);
 
-                string fileName = Path.GetFileName(file);
-                File.WriteAllBytes($"{TempDirectoryName}\\{fileName}", compressedFile);
+                    string fileName = Path.GetFileName(file);
+                    File.WriteAllBytes($"{TempDirectoryName}\\{fileName}", compressedFile);
+                }
             });
 
             // Open directory
