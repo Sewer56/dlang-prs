@@ -1,3 +1,4 @@
+Superseded by [prs-rs](https://github.com/Sewer56/prs-rs).
 
 # Changelog
 	19-Sep-2019: Performance tweak adjusted. Compressor now produces optimally compressed files. Files are now same size as original game files.
